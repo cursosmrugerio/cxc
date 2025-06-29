@@ -1,5 +1,21 @@
 
 document.addEventListener('DOMContentLoaded', function () {
+    // Check authentication first
+    if (!requireAuth()) {
+        return;
+    }
+
+    // Display user info
+    const userData = authManager.getUserData();
+    if (userData) {
+        document.getElementById('user-info').textContent = `Welcome, ${userData.username}`;
+    }
+
+    // Logout handler
+    document.getElementById('logout-btn').addEventListener('click', function() {
+        authManager.logout();
+    });
+
     const apiUrl = '/api/v1/inmobiliarias';
     const form = document.getElementById('inmobiliaria-form');
     const tableBody = document.getElementById('inmobiliaria-table-body');
@@ -8,7 +24,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // Function to fetch and display all records
     async function loadTable() {
         try {
-            const response = await fetch(apiUrl);
+            const response = await authManager.authenticatedFetch(apiUrl);
             if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
             const inmobiliarias = await response.json();
 
@@ -38,7 +54,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // Function to populate form for editing
     async function editInmobiliaria(id) {
         try {
-            const response = await fetch(`${apiUrl}/${id}`);
+            const response = await authManager.authenticatedFetch(`${apiUrl}/${id}`);
             if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
             const inmo = await response.json();
 
@@ -68,7 +84,7 @@ document.addEventListener('DOMContentLoaded', function () {
         if (!confirm(`Are you sure you want to delete record ${id}?`)) return;
 
         try {
-            const response = await fetch(`${apiUrl}/${id}`, { method: 'DELETE' });
+            const response = await authManager.authenticatedFetch(`${apiUrl}/${id}`, { method: 'DELETE' });
             if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
             
             loadTable(); // Refresh the table
@@ -105,9 +121,8 @@ document.addEventListener('DOMContentLoaded', function () {
         const url = isUpdate ? `${apiUrl}/${id}` : apiUrl;
 
         try {
-            const response = await fetch(url, {
+            const response = await authManager.authenticatedFetch(url, {
                 method: method,
-                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(inmoData)
             });
 
