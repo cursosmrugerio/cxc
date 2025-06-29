@@ -1,6 +1,5 @@
 {
   "theme": "Default",
-  "selectedAuthType": "oauth-personal",
   "mcpServers": {
     "supabase": {
       "command": "npx",
