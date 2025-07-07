@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inmobiliarias</title>
+    <link href="css/style.css" rel="stylesheet">
+</head>
+<body>
+    <div id="menu-container"></div>
+    <div class="page-container">
+        <div id="header-container"></div>
+        <main class="main-content">
+            <h2>Gestión de Inmobiliarias</h2>
+
+            <form id="inmobiliaria-form">
+                <input type="hidden" id="inmobiliaria-id">
+                <input type="text" id="nombre" placeholder="Nombre" required>
+                <input type="text" id="direccion" placeholder="Dirección" required>
+                <button type="submit">Guardar</button>
+            </form>
+
+            <table id="inmobiliarias-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nombre</th>
+                        <th>Dirección</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Rows will be inserted here -->
+                </tbody>
+            </table>
+        </main>
+    </div>
+
+    <script src="js/auth.js"></script>
+    <script src="js/header.js"></script>
+    <script src="js/menu.js"></script>
+    <script src="js/inmobiliaria.js"></script>
+</body>
+</html>

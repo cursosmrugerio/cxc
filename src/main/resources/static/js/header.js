@@ -90,6 +90,18 @@ class HeaderComponent {
         if (logoutBtn) {
             logoutBtn.addEventListener('click', this.handleLogout.bind(this));
         }
+
+        const menuToggleBtn = document.getElementById('menu-toggle-btn');
+        if (menuToggleBtn) {
+            menuToggleBtn.addEventListener('click', this.toggleMenu.bind(this));
+        }
+    }
+
+    toggleMenu() {
+        const menu = document.querySelector('.main-menu');
+        if (menu) {
+            menu.classList.toggle('open');
+        }
     }
 
     updateUserInfo() {
