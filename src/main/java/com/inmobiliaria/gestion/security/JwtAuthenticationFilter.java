@@ -70,7 +70,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                path.endsWith(".html") || 
                path.startsWith("/css/") || 
                path.startsWith("/js/") || 
-               path.startsWith("/images/");
+               path.startsWith("/images/") ||
+               path.equals("/error") ||
+               path.startsWith("/.well-known/");
     }
 
     private String parseJwt(HttpServletRequest request) {
