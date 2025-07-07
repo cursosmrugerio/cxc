@@ -1,9 +1,22 @@
 
 document.addEventListener('DOMContentLoaded', function () {
-    // Check authentication first
-    if (!requireAuth()) {
+    // Check if authManager is available
+    if (typeof authManager === 'undefined') {
+        console.error('AuthManager not found! Check if auth.js is loaded properly.');
+        window.location.href = 'login.html';
         return;
     }
+
+    console.log('AuthManager found, checking authentication...');
+    
+    // Check authentication first - exit immediately if not authenticated
+    if (!authManager.isAuthenticated()) {
+        console.log('User not authenticated, redirecting to login');
+        window.location.href = 'login.html';
+        return;
+    }
+    
+    console.log('User is authenticated, continuing with app initialization');
 
     // Display user info
     const userData = authManager.getUserData();
@@ -12,9 +25,16 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // Logout handler
-    document.getElementById('logout-btn').addEventListener('click', function() {
-        authManager.logout();
-    });
+    const logoutBtn = document.getElementById('logout-btn');
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            console.log('Logout button clicked');
+            authManager.logout();
+        });
+    } else {
+        console.error('Logout button not found');
+    }
 
     const apiUrl = '/api/v1/inmobiliarias';
     const form = document.getElementById('inmobiliaria-form');
@@ -157,6 +177,8 @@ document.addEventListener('DOMContentLoaded', function () {
         cancelButton.style.display = 'none';
     });
 
-    // Initial load
-    loadTable();
+    // Initial load - double check authentication before making API calls
+    if (authManager.isAuthenticated()) {
+        loadTable();
+    }
 });

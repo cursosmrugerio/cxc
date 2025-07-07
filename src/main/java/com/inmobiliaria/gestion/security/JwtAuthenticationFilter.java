@@ -28,10 +28,17 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, 
                                   FilterChain filterChain) throws ServletException, IOException {
+        String path = request.getRequestURI();
+        String method = request.getMethod();
+        log.debug("Processing {} request for path: {}", method, path);
+        
         try {
             String jwt = parseJwt(request);
+            log.debug("JWT token found: {} for path: {}", jwt != null, path);
+            
             if (jwt != null && jwtUtil.validateJwtToken(jwt)) {
                 String username = jwtUtil.getUserNameFromJwtToken(jwt);
+                log.debug("JWT valid for user: {} on path: {}", username, path);
 
                 UserDetails userDetails = userDetailsService.loadUserByUsername(username);
                 UsernamePasswordAuthenticationToken authentication = 
@@ -39,9 +46,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
                 SecurityContextHolder.getContext().setAuthentication(authentication);
+                log.debug("Authentication set for user: {} on path: {}", username, path);
+            } else if (jwt != null) {
+                log.warn("Invalid JWT token for path: {}", path);
+            } else {
+                log.debug("No JWT token found for {} {}", method, path);
             }
         } catch (Exception e) {
-            log.error("Cannot set user authentication: {}", e.getMessage());
+            log.error("Cannot set user authentication for {} {}: {}", method, path, e.getMessage());
         }
 
         filterChain.doFilter(request, response);

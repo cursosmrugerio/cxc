@@ -17,7 +17,7 @@ import java.util.Date;
 @Slf4j
 public class JwtUtil {
 
-    @Value("${jwt.secret:inmobiliaria-secret-key-very-long-and-secure-for-jwt-signing}")
+    @Value("${jwt.secret}")
     private String jwtSecret;
 
     @Value("${jwt.expiration:86400}")
@@ -53,10 +53,12 @@ public class JwtUtil {
 
     public boolean validateJwtToken(String authToken) {
         try {
+            log.debug("Validating JWT token");
             Jwts.parser()
                     .verifyWith(getSigningKey())
                     .build()
                     .parseSignedClaims(authToken);
+            log.debug("JWT token validation successful");
             return true;
         } catch (MalformedJwtException e) {
             log.error("Invalid JWT token: {}", e.getMessage());
@@ -66,6 +68,8 @@ public class JwtUtil {
             log.error("JWT token is unsupported: {}", e.getMessage());
         } catch (IllegalArgumentException e) {
             log.error("JWT claims string is empty: {}", e.getMessage());
+        } catch (Exception e) {
+            log.error("JWT token validation failed: {}", e.getMessage());
         }
         return false;
     }

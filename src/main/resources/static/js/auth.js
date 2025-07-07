@@ -30,9 +30,29 @@ class AuthManager {
 
     // Clear authentication data
     logout() {
+        console.log('=== LOGOUT FUNCTION CALLED ===');
+        console.log('Token before logout:', this.getToken());
+        
+        // Clear the tokens
         localStorage.removeItem(this.tokenKey);
         localStorage.removeItem(this.userKey);
-        window.location.href = 'login.html';
+        
+        console.log('Token after logout:', this.getToken());
+        console.log('User data after logout:', this.getUserData());
+        console.log('Is authenticated after logout:', this.isAuthenticated());
+        
+        console.log('Current location before redirect:', window.location.href);
+        
+        // Add a small delay to ensure console logs are visible
+        setTimeout(() => {
+            console.log('Attempting redirect to login page...');
+            try {
+                window.location.href = '/login.html';
+            } catch (error) {
+                console.error('Error during redirect:', error);
+                alert('Redirect failed. Please manually navigate to login page.');
+            }
+        }, 100);
     }
 
     // Make authenticated API requests
@@ -113,10 +133,37 @@ class AuthManager {
             throw error;
         }
     }
+
+    // Get available roles
+    async getRoles() {
+        try {
+            const response = await fetch(`${this.apiUrl}/roles`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.message || 'Failed to fetch roles');
+            }
+
+            return data;
+        } catch (error) {
+            throw error;
+        }
+    }
 }
 
 // Create global auth manager instance
 const authManager = new AuthManager();
+
+// Make it available on window for debugging
+window.authManager = authManager;
+
+console.log('AuthManager created and available globally');
 
 // Utility functions
 function showError(message, elementId = 'error-message') {
@@ -190,6 +237,46 @@ document.addEventListener('DOMContentLoaded', function() {
                 hideSpinner('login-btn', 'login-spinner');
             }
         });
+    }
+
+    // Load roles for register form
+    const roleSelect = document.getElementById('role');
+    if (roleSelect) {
+        // Use an async IIFE (Immediately Invoked Function Expression)
+        (async () => {
+            try {
+                const roles = await authManager.getRoles();
+            roleSelect.innerHTML = ''; // Clear existing options
+            
+            // Add default option
+            const defaultOption = document.createElement('option');
+            defaultOption.value = '';
+            defaultOption.textContent = 'Select a role';
+            defaultOption.disabled = true;
+            defaultOption.selected = true;
+            roleSelect.appendChild(defaultOption);
+            
+            roles.forEach(role => {
+                const option = document.createElement('option');
+                // Convert ROLE_ADMIN to admin, ROLE_USER to user, etc.
+                const roleValue = role.name.replace('ROLE_', '').toLowerCase();
+                const roleDisplay = roleValue.charAt(0).toUpperCase() + roleValue.slice(1);
+                
+                option.value = roleValue;
+                option.textContent = roleDisplay;
+                roleSelect.appendChild(option);
+            });
+            } catch (error) {
+                console.error('Failed to load roles:', error);
+                // Fallback to hardcoded options if API fails
+                roleSelect.innerHTML = `
+                    <option value="">Select a role</option>
+                    <option value="user">User</option>
+                    <option value="moderator">Moderator</option>
+                    <option value="admin">Admin</option>
+                `;
+            }
+        })(); // Close the async IIFE
     }
 
     // Register form handler

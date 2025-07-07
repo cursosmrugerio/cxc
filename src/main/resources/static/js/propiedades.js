@@ -1,5 +1,7 @@
 document.addEventListener('DOMContentLoaded', function () {
-    if (!requireAuth()) {
+    // Check authentication first - exit immediately if not authenticated
+    if (!authManager.isAuthenticated()) {
+        window.location.href = 'login.html';
         return;
     }
 
@@ -8,9 +10,16 @@ document.addEventListener('DOMContentLoaded', function () {
         document.getElementById('user-info').textContent = `Welcome, ${userData.username}`;
     }
 
-    document.getElementById('logout-btn').addEventListener('click', function() {
-        authManager.logout();
-    });
+    const logoutBtn = document.getElementById('logout-btn');
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            console.log('Logout button clicked on propiedades page');
+            authManager.logout();
+        });
+    } else {
+        console.error('Logout button not found on propiedades page');
+    }
 
     const apiUrl = '/api/v1/propiedades';
     const inmobiliariaApiUrl = '/api/v1/inmobiliarias';
@@ -155,6 +164,9 @@ document.addEventListener('DOMContentLoaded', function () {
         cancelButton.style.display = 'none';
     });
 
-    loadInmobiliarias();
-    loadTable();
+    // Initial load - double check authentication before making API calls
+    if (authManager.isAuthenticated()) {
+        loadInmobiliarias();
+        loadTable();
+    }
 });

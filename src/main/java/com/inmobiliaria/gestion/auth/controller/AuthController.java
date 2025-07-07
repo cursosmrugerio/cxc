@@ -1,6 +1,7 @@
 package com.inmobiliaria.gestion.auth.controller;
 
 import com.inmobiliaria.gestion.auth.dto.*;
+import com.inmobiliaria.gestion.auth.dto.RoleResponse;
 import com.inmobiliaria.gestion.auth.model.Role;
 import com.inmobiliaria.gestion.auth.model.User;
 import com.inmobiliaria.gestion.auth.repository.RoleRepository;
@@ -115,5 +116,15 @@ public class AuthController {
         userRepository.save(user);
 
         return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
+    }
+
+    @Operation(summary = "Get available roles", description = "Get list of all available roles for user registration")
+    @ApiResponse(responseCode = "200", description = "Roles retrieved successfully")
+    @GetMapping("/roles")
+    public ResponseEntity<List<RoleResponse>> getRoles() {
+        List<RoleResponse> roles = roleRepository.findAll().stream()
+                .map(role -> new RoleResponse(role.getId(), role.getName().name()))
+                .toList();
+        return ResponseEntity.ok(roles);
     }
 }

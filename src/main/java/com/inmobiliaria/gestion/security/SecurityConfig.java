@@ -38,7 +38,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/v1/auth/**").permitAll()
                         .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/api-docs", "/api-docs/**", "/v3/api-docs/**").permitAll()
-                        .requestMatchers("/", "/index.html", "/login.html", "/register.html", "/propiedades.html", "/conceptos-pago.html", "/configuracion-recargos.html", "/css/**", "/js/**", "/images/**").permitAll()
+                        .requestMatchers("/", "/index.html", "/login.html", "/register.html", "/propiedades.html", "/conceptos-pago.html", "/configuracion-recargos.html", "/contratos-renta.html", "/css/**", "/js/**", "/images/**", "/favicon.ico").permitAll()
+                        .requestMatchers("/error", "/.well-known/**").permitAll()
                         .requestMatchers("/api/v1/inmobiliarias/**").authenticated()
                         .anyRequest().authenticated()
                 );

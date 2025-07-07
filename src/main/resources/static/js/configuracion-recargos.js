@@ -1,5 +1,7 @@
 document.addEventListener('DOMContentLoaded', function () {
-    if (!requireAuth()) {
+    // Check authentication first - exit immediately if not authenticated
+    if (!authManager.isAuthenticated()) {
+        window.location.href = 'login.html';
         return;
     }
 
@@ -156,6 +158,9 @@ document.addEventListener('DOMContentLoaded', function () {
         cancelButton.style.display = 'none';
     });
 
-    loadInmobiliarias();
-    loadTable();
+    // Initial load - double check authentication before making API calls
+    if (authManager.isAuthenticated()) {
+        loadInmobiliarias();
+        loadTable();
+    }
 });
