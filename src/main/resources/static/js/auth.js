@@ -1,4 +1,3 @@
-// Authentication utilities and event handlers
 class AuthManager {
     constructor() {
         this.apiUrl = '/api/v1/auth';
@@ -6,56 +5,30 @@ class AuthManager {
         this.userKey = 'user_data';
     }
 
-    // Save JWT token and user data to localStorage
     saveToken(token, userData) {
         localStorage.setItem(this.tokenKey, token);
         localStorage.setItem(this.userKey, JSON.stringify(userData));
     }
 
-    // Get JWT token from localStorage
     getToken() {
         return localStorage.getItem(this.tokenKey);
     }
 
-    // Get user data from localStorage
     getUserData() {
         const userData = localStorage.getItem(this.userKey);
         return userData ? JSON.parse(userData) : null;
     }
 
-    // Check if user is authenticated
     isAuthenticated() {
         return !!this.getToken();
     }
 
-    // Clear authentication data
     logout() {
-        console.log('=== LOGOUT FUNCTION CALLED ===');
-        console.log('Token before logout:', this.getToken());
-        
-        // Clear the tokens
         localStorage.removeItem(this.tokenKey);
         localStorage.removeItem(this.userKey);
-        
-        console.log('Token after logout:', this.getToken());
-        console.log('User data after logout:', this.getUserData());
-        console.log('Is authenticated after logout:', this.isAuthenticated());
-        
-        console.log('Current location before redirect:', window.location.href);
-        
-        // Add a small delay to ensure console logs are visible
-        setTimeout(() => {
-            console.log('Attempting redirect to login page...');
-            try {
-                window.location.href = '/login.html';
-            } catch (error) {
-                console.error('Error during redirect:', error);
-                alert('Redirect failed. Please manually navigate to login page.');
-            }
-        }, 100);
+        window.location.href = '/login.html';
     }
 
-    // Make authenticated API requests
     async authenticatedFetch(url, options = {}) {
         const token = this.getToken();
         if (!token) {
@@ -81,7 +54,6 @@ class AuthManager {
         return response;
     }
 
-    // Login function
     async login(username, password) {
         try {
             const response = await fetch(`${this.apiUrl}/signin`, {
@@ -98,7 +70,6 @@ class AuthManager {
                 throw new Error(data.message || 'Login failed');
             }
 
-            // Save token and user data
             this.saveToken(data.token, {
                 username: data.username,
                 email: data.email,
@@ -111,7 +82,6 @@ class AuthManager {
         }
     }
 
-    // Register function
     async register(userData) {
         try {
             const response = await fetch(`${this.apiUrl}/signup`, {
@@ -134,7 +104,6 @@ class AuthManager {
         }
     }
 
-    // Get available roles
     async getRoles() {
         try {
             const response = await fetch(`${this.apiUrl}/roles`, {
@@ -157,15 +126,9 @@ class AuthManager {
     }
 }
 
-// Create global auth manager instance
 const authManager = new AuthManager();
-
-// Make it available on window for debugging
 window.authManager = authManager;
 
-console.log('AuthManager created and available globally');
-
-// Utility functions
 function showError(message, elementId = 'error-message') {
     const errorElement = document.getElementById(elementId);
     if (errorElement) {
@@ -189,13 +152,6 @@ function showSuccess(message, elementId = 'success-message') {
     }
 }
 
-function hideSuccess(elementId = 'success-message') {
-    const successElement = document.getElementById(elementId);
-    if (successElement) {
-        successElement.classList.add('d-none');
-    }
-}
-
 function showSpinner(buttonId, spinnerId) {
     const button = document.getElementById(buttonId);
     const spinner = document.getElementById(spinnerId);
@@ -214,9 +170,7 @@ function hideSpinner(buttonId, spinnerId) {
     }
 }
 
-// Page-specific event handlers
 document.addEventListener('DOMContentLoaded', function() {
-    // Login form handler
     const loginForm = document.getElementById('login-form');
     if (loginForm) {
         loginForm.addEventListener('submit', async function(e) {
@@ -239,47 +193,40 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Load roles for register form
     const roleSelect = document.getElementById('role');
     if (roleSelect) {
-        // Use an async IIFE (Immediately Invoked Function Expression)
         (async () => {
             try {
                 const roles = await authManager.getRoles();
-            roleSelect.innerHTML = ''; // Clear existing options
-            
-            // Add default option
-            const defaultOption = document.createElement('option');
-            defaultOption.value = '';
-            defaultOption.textContent = 'Select a role';
-            defaultOption.disabled = true;
-            defaultOption.selected = true;
-            roleSelect.appendChild(defaultOption);
-            
-            roles.forEach(role => {
-                const option = document.createElement('option');
-                // Convert ROLE_ADMIN to admin, ROLE_USER to user, etc.
-                const roleValue = role.name.replace('ROLE_', '').toLowerCase();
-                const roleDisplay = roleValue.charAt(0).toUpperCase() + roleValue.slice(1);
+                roleSelect.innerHTML = '';
                 
-                option.value = roleValue;
-                option.textContent = roleDisplay;
-                roleSelect.appendChild(option);
-            });
+                const defaultOption = document.createElement('option');
+                defaultOption.value = '';
+                defaultOption.textContent = 'Select a role';
+                defaultOption.disabled = true;
+                defaultOption.selected = true;
+                roleSelect.appendChild(defaultOption);
+                
+                roles.forEach(role => {
+                    const option = document.createElement('option');
+                    const roleValue = role.name.replace('ROLE_', '').toLowerCase();
+                    const roleDisplay = roleValue.charAt(0).toUpperCase() + roleValue.slice(1);
+                    
+                    option.value = roleValue;
+                    option.textContent = roleDisplay;
+                    roleSelect.appendChild(option);
+                });
             } catch (error) {
                 console.error('Failed to load roles:', error);
-                // Fallback to hardcoded options if API fails
                 roleSelect.innerHTML = `
                     <option value="">Select a role</option>
                     <option value="user">User</option>
-                    <option value="moderator">Moderator</option>
                     <option value="admin">Admin</option>
                 `;
             }
-        })(); // Close the async IIFE
+        })();
     }
 
-    // Register form handler
     const registerForm = document.getElementById('register-form');
     if (registerForm) {
         registerForm.addEventListener('submit', async function(e) {
@@ -292,15 +239,12 @@ document.addEventListener('DOMContentLoaded', function() {
             const role = document.getElementById('role').value;
             
             hideError();
-            hideSuccess();
             
-            // Validate passwords match
             if (password !== confirmPassword) {
                 showError('Passwords do not match');
                 return;
             }
             
-            // Validate password length
             if (password.length < 6) {
                 showError('Password must be at least 6 characters long');
                 return;
@@ -309,18 +253,11 @@ document.addEventListener('DOMContentLoaded', function() {
             showSpinner('register-btn', 'register-spinner');
             
             try {
-                const userData = {
-                    username,
-                    email,
-                    password,
-                    role: [role]
-                };
-                
+                const userData = { username, email, password, role: [role] };
                 await authManager.register(userData);
                 showSuccess('Registration successful! You can now log in.');
                 registerForm.reset();
                 
-                // Redirect to login after 2 seconds
                 setTimeout(() => {
                     window.location.href = 'login.html';
                 }, 2000);
@@ -333,21 +270,3 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 });
-
-// Redirect to login if not authenticated (for protected pages)
-function requireAuth() {
-    if (!authManager.isAuthenticated()) {
-        window.location.href = 'login.html';
-        return false;
-    }
-    return true;
-}
-
-// Redirect to main page if already authenticated (for login/register pages)
-function redirectIfAuthenticated() {
-    if (authManager.isAuthenticated()) {
-        window.location.href = 'index.html';
-        return true;
-    }
-    return false;
-}
