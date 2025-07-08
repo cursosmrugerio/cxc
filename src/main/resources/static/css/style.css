@@ -4,9 +4,13 @@
     color: white;
     padding: 1rem 0;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    position: sticky;
+    position: fixed;
     top: 0;
-    z-index: 1000;
+    left: 0;
+    right: 0;
+    z-index: 1001;
+    height: 70px;
+    box-sizing: border-box;
 }
 
 .header-container {
@@ -59,12 +63,12 @@
 }
 
 /* Main content area */
-.main-content {
-    padding: 2rem 0;
+.container {
+    padding: 2rem;
     max-width: 1200px;
     margin: 0 auto;
-    padding-left: 1rem;
-    padding-right: 1rem;
+    background-color: #ffffff;
+    min-height: calc(100vh - 70px);
 }
 
 /* Responsive design */
@@ -93,17 +97,6 @@
     display: flex;
 }
 
-.main-menu {
-    width: 200px;
-    background-color: #5D9CEC; /* Clear, modern blue */
-    color: white;
-    height: 100vh;
-    padding: 15px;
-    position: fixed;
-    left: -200px;
-    transition: left 0.3s ease-in-out;
-}
-
 /* Responsive Menu Styles */
 .menu-toggle-btn {
     display: none; /* Hidden by default */
@@ -118,18 +111,21 @@
     width: 200px;
     background-color: #5D9CEC;
     color: white;
-    height: 100%;
+    height: calc(100vh - 70px);
     position: fixed;
-    top: 0;
+    top: 70px;
     left: 0;
-    z-index: 1001; /* Above header */
-    padding-top: 60px; /* Space for header */
+    z-index: 999;
+    padding: 0;
     transition: transform 0.3s ease-in-out;
     transform: translateX(0);
+    box-shadow: 2px 0 5px rgba(0,0,0,0.1);
 }
 
 .page-container {
     transition: margin-left 0.3s ease-in-out;
+    min-height: calc(100vh - 70px);
+    margin-top: 70px;
 }
 
 /* Large screens */
@@ -155,6 +151,9 @@
 
     .main-menu {
         transform: translateX(-100%);
+        top: 0;
+        height: 100vh;
+        padding-top: 70px;
     }
 
     .main-menu.open {
@@ -173,17 +172,28 @@
     margin: 0;
 }
 
+.main-menu li {
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
 .main-menu li a {
     color: white;
     text-decoration: none;
     display: block;
-    padding: 12px 15px;
-    border-radius: 4px;
-    transition: background-color 0.2s ease-in-out;
+    padding: 15px 20px;
+    transition: all 0.2s ease-in-out;
+    font-size: 14px;
+    font-weight: 500;
 }
 
 .main-menu li a:hover {
-    background-color: #4A89DC; /* Slightly darker blue on hover */
+    background-color: #4A89DC;
+    padding-left: 25px;
+}
+
+.main-menu li.active a {
+    background-color: #4A89DC;
+    border-left: 4px solid #ffffff;
 }
 
 .main-content {
