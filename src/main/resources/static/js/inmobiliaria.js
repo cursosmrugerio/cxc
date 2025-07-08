@@ -1,81 +1,70 @@
-document.addEventListener('DOMContentLoaded', function () {
-    const apiUrl = 'http://localhost:8080/api/inmobiliarias';
-    const token = localStorage.getItem('jwt_token');
+document.addEventListener('DOMContentLoaded', () => {
+    const API_BASE_URL = 'http://localhost:8080/api/v1/inmobiliarias';
+    const inmobiliariaTableBody = document.getElementById('inmobiliariaTableBody');
 
-    const form = document.getElementById('inmobiliaria-form');
-    const tableBody = document.querySelector('#inmobiliarias-table tbody');
+    // Function to get JWT token from localStorage
+    const getAuthToken = () => localStorage.getItem('jwt_token');
 
-    function getHeaders() {
-        return {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-        };
-    }
+    // Function to fetch all inmobiliarias
+    const fetchAllInmobiliarias = async () => {
+        const token = getAuthToken();
+        if (!token) {
+            alert('No autorizado. Por favor, inicie sesión.');
+            window.location.href = 'login.html';
+            return;
+        }
 
-    async function fetchInmobiliarias() {
         try {
-            const response = await fetch(apiUrl, { headers: getHeaders() });
-            const inmobiliarias = await response.json();
-            tableBody.innerHTML = '';
-            inmobiliarias.forEach(inmobiliaria => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${inmobiliaria.id}</td>
-                    <td>${inmobiliaria.nombre}</td>
-                    <td>${inmobiliaria.direccion}</td>
-                    <td>
-                        <button onclick="editInmobiliaria(${inmobiliaria.id}, '${inmobiliaria.nombre}', '${inmobiliaria.direccion}')">Editar</button>
-                        <button onclick="deleteInmobiliaria(${inmobiliaria.id})">Eliminar</button>
-                    </td>
-                `;
-                tableBody.appendChild(row);
+            // Fetch all inmobiliarias by setting a very large size and page 0
+            const response = await fetch(`${API_BASE_URL}?page=0&size=10000&sortBy=nombreComercial&sortDir=asc`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
             });
+
+            if (response.status === 401) {
+                alert('Sesión expirada o no autorizado. Por favor, inicie sesión nuevamente.');
+                window.location.href = 'login.html';
+                return;
+            }
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            displayInmobiliarias(data.content);
         } catch (error) {
             console.error('Error fetching inmobiliarias:', error);
+            alert('Error al cargar las inmobiliarias.');
         }
+    };
+
+    // Function to display inmobiliarias in the table
+    const displayInmobiliarias = (inmobiliarias) => {
+        if (!inmobiliariaTableBody) return; // Ensure we are on the list page
+
+        inmobiliariaTableBody.innerHTML = '';
+        inmobiliarias.forEach(inmobiliaria => {
+            const row = inmobiliariaTableBody.insertRow();
+            row.insertCell().textContent = inmobiliaria.nombreComercial;
+            row.insertCell().textContent = inmobiliaria.razonSocial;
+            row.insertCell().textContent = inmobiliaria.rfcNit;
+            row.insertCell().textContent = inmobiliaria.ciudad;
+            row.insertCell().textContent = inmobiliaria.estado;
+            row.insertCell().textContent = inmobiliaria.estatus;
+        });
+    };
+
+    // Initial fetch for the list page
+    if (inmobiliariaTableBody) {
+        fetchAllInmobiliarias();
     }
 
-    form.addEventListener('submit', async function (event) {
-        event.preventDefault();
-        const id = document.getElementById('inmobiliaria-id').value;
-        const nombre = document.getElementById('nombre').value;
-        const direccion = document.getElementById('direccion').value;
-
-        const method = id ? 'PUT' : 'POST';
-        const url = id ? `${apiUrl}/${id}` : apiUrl;
-
-        try {
-            await fetch(url, {
-                method: method,
-                headers: getHeaders(),
-                body: JSON.stringify({ nombre, direccion })
-            });
-            form.reset();
-            fetchInmobiliarias();
-        } catch (error) {
-            console.error('Error saving inmobiliaria:', error);
-        }
-    });
-
-    window.editInmobiliaria = function (id, nombre, direccion) {
-        document.getElementById('inmobiliaria-id').value = id;
-        document.getElementById('nombre').value = nombre;
-        document.getElementById('direccion').value = direccion;
+    // Event listener for the Add Inmobiliaria button
+    if (addInmobiliariaButton) {
+        addInmobiliariaButton.addEventListener('click', () => {
+            window.location.href = 'inmobiliaria-add.html';
+        });
     }
-
-    window.deleteInmobiliaria = async function (id) {
-        if (confirm('¿Estás seguro de que quieres eliminar esta inmobiliaria?')) {
-            try {
-                await fetch(`${apiUrl}/${id}`, {
-                    method: 'DELETE',
-                    headers: getHeaders()
-                });
-                fetchInmobiliarias();
-            } catch (error) {
-                console.error('Error deleting inmobiliaria:', error);
-            }
-        }
-    }
-
-    fetchInmobiliarias();
 });
