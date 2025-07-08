@@ -13,6 +13,32 @@
     <div class="page-container">
         <main class="container">
         <h1>Listado de Propiedades</h1>
+        
+        <div class="filter-section">
+            <div class="filter-group">
+                <label for="filterSelect">Filtrar por:</label>
+                <select id="filterSelect">
+                    <option value="todos">Todas las propiedades</option>
+                    <option value="tipo">Por tipo de propiedad</option>
+                    <option value="estatus">Por estatus</option>
+                    <option value="habitaciones">Por número de habitaciones</option>
+                    <option value="inmobiliaria">Por inmobiliaria</option>
+                </select>
+            </div>
+            
+            <div class="filter-group" id="filterValueGroup" style="display: none;">
+                <label for="filterValue">Valor:</label>
+                <select id="filterValue">
+                    <!-- Options will be populated dynamically -->
+                </select>
+            </div>
+            
+            <div class="filter-actions">
+                <button id="applyFilterButton" class="filter-button">Aplicar Filtro</button>
+                <button id="clearFilterButton" class="clear-filter-button">Limpiar</button>
+            </div>
+        </div>
+        
         <button id="addPropiedadButton" class="add-button">Agregar Propiedad</button>
 
         <section class="propiedad-list">

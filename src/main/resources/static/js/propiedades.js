@@ -161,4 +161,197 @@ document.addEventListener('DOMContentLoaded', () => {
         const badgeClass = statusClass[status.toUpperCase()] || 'badge-secondary';
         return `<span class="badge ${badgeClass}">${status}</span>`;
     };
+
+    // Store all propiedades for filtering
+    let allPropiedades = [];
+    
+    // Store inmobiliarias mapping (id -> name)
+    let inmobiliariaMap = new Map();
+    
+    // Function to fetch inmobiliarias and create mapping
+    const fetchInmobiliarias = async () => {
+        const token = getAuthToken();
+        if (!token) return;
+
+        try {
+            const response = await fetch('http://localhost:8080/api/v1/inmobiliarias?page=0&size=10000', {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                const inmobiliarias = data.content || data;
+                
+                // Create mapping from id to name
+                inmobiliarias.forEach(inmobiliaria => {
+                    inmobiliariaMap.set(inmobiliaria.idInmobiliaria, inmobiliaria.nombreComercial);
+                });
+            }
+        } catch (error) {
+            console.error('Error fetching inmobiliarias:', error);
+        }
+    };
+
+    // Enhanced function to fetch all propiedades and store them
+    const fetchAllPropiedadesEnhanced = async () => {
+        const token = getAuthToken();
+        if (!token) {
+            alert('No autorizado. Por favor, inicie sesión.');
+            window.location.href = 'login.html';
+            return;
+        }
+
+        try {
+            // First fetch inmobiliarias to create the mapping
+            await fetchInmobiliarias();
+            
+            const response = await fetch(`${API_BASE_URL}`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            if (response.status === 401) {
+                alert('Sesión expirada o no autorizado. Por favor, inicie sesión nuevamente.');
+                window.location.href = 'login.html';
+                return;
+            }
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const propiedades = await response.json();
+            allPropiedades = propiedades;
+            displayPropiedades(propiedades);
+        } catch (error) {
+            console.error('Error fetching propiedades:', error);
+            alert('Error al cargar las propiedades.');
+        }
+    };
+
+    // Filter functionality
+    const filterSelect = document.getElementById('filterSelect');
+    const filterValueGroup = document.getElementById('filterValueGroup');
+    const filterValue = document.getElementById('filterValue');
+    const applyFilterButton = document.getElementById('applyFilterButton');
+    const clearFilterButton = document.getElementById('clearFilterButton');
+
+    // Function to populate filter values based on selected filter type
+    const populateFilterValues = (filterType) => {
+        if (!filterValue) return;
+
+        filterValue.innerHTML = '';
+        
+        if (filterType === 'todos') {
+            filterValueGroup.style.display = 'none';
+            return;
+        }
+
+        filterValueGroup.style.display = 'block';
+        
+        const uniqueValues = new Set();
+        
+        allPropiedades.forEach(propiedad => {
+            let value;
+            switch (filterType) {
+                case 'tipo':
+                    value = propiedad.tipoPropiedad;
+                    break;
+                case 'estatus':
+                    value = propiedad.estatusPropiedad;
+                    break;
+                case 'habitaciones':
+                    value = propiedad.numeroHabitaciones;
+                    break;
+                case 'inmobiliaria':
+                    // Get the inmobiliaria name from the mapping
+                    value = inmobiliariaMap.get(propiedad.idInmobiliaria);
+                    break;
+            }
+            
+            if (value !== null && value !== undefined && value !== '') {
+                uniqueValues.add(value);
+            }
+        });
+
+        // Sort values
+        const sortedValues = Array.from(uniqueValues).sort((a, b) => {
+            if (filterType === 'habitaciones') {
+                return parseInt(a) - parseInt(b);
+            }
+            return a.localeCompare(b);
+        });
+
+        // Add options to select
+        sortedValues.forEach(value => {
+            const option = document.createElement('option');
+            option.value = value;
+            option.textContent = value;
+            filterValue.appendChild(option);
+        });
+    };
+
+    // Function to apply filter
+    const applyFilter = () => {
+        const selectedFilter = filterSelect.value;
+        
+        if (selectedFilter === 'todos') {
+            displayPropiedades(allPropiedades);
+            return;
+        }
+
+        const selectedValue = filterValue.value;
+        if (!selectedValue) {
+            alert('Por favor seleccione un valor para filtrar.');
+            return;
+        }
+
+        const filteredPropiedades = allPropiedades.filter(propiedad => {
+            switch (selectedFilter) {
+                case 'tipo':
+                    return propiedad.tipoPropiedad === selectedValue;
+                case 'estatus':
+                    return propiedad.estatusPropiedad === selectedValue;
+                case 'habitaciones':
+                    return propiedad.numeroHabitaciones === parseInt(selectedValue);
+                case 'inmobiliaria':
+                    // Compare using the inmobiliaria name from the mapping
+                    return inmobiliariaMap.get(propiedad.idInmobiliaria) === selectedValue;
+                default:
+                    return true;
+            }
+        });
+
+        displayPropiedades(filteredPropiedades);
+    };
+
+    // Function to clear filter
+    const clearFilter = () => {
+        filterSelect.value = 'todos';
+        filterValueGroup.style.display = 'none';
+        displayPropiedades(allPropiedades);
+    };
+
+    // Event listeners for filter functionality
+    if (filterSelect) {
+        filterSelect.addEventListener('change', (e) => {
+            populateFilterValues(e.target.value);
+        });
+    }
+
+    if (applyFilterButton) {
+        applyFilterButton.addEventListener('click', applyFilter);
+    }
+
+    if (clearFilterButton) {
+        clearFilterButton.addEventListener('click', clearFilter);
+    }
+
+    // Replace the initial fetch with enhanced version
+    if (propiedadTableBody) {
+        fetchAllPropiedadesEnhanced();
+    }
 });
