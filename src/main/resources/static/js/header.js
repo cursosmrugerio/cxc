@@ -47,6 +47,11 @@ class HeaderComponent {
         const fallbackHtml = `
             <header class="app-header">
                 <div class="header-container">
+                    <button class="menu-toggle-btn" id="menu-toggle-btn">
+                        <svg width="16" height="16" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 15a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"/>
+                        </svg>
+                    </button>
                     <div class="header-brand">
                         <h1>Sistema de Gestión</h1>
                     </div>
@@ -91,17 +96,8 @@ class HeaderComponent {
             logoutBtn.addEventListener('click', this.handleLogout.bind(this));
         }
 
-        const menuToggleBtn = document.getElementById('menu-toggle-btn');
-        if (menuToggleBtn) {
-            menuToggleBtn.addEventListener('click', this.toggleMenu.bind(this));
-        }
-    }
-
-    toggleMenu() {
-        const menu = document.querySelector('.main-menu');
-        if (menu) {
-            menu.classList.toggle('open');
-        }
+        // Notify that header is loaded so menu.js can initialize
+        document.dispatchEvent(new CustomEvent('headerLoaded'));
     }
 
     updateUserInfo() {

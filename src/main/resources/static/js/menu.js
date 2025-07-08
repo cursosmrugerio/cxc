@@ -9,11 +9,30 @@ document.addEventListener('DOMContentLoaded', () => {
             overlay.className = 'menu-overlay';
             document.body.appendChild(overlay);
             
-            // Initialize menu toggle functionality
-            const menuToggle = document.getElementById('menu-toggle-btn');
-            const menu = document.querySelector('.main-menu');
+            // Wait for header to be loaded before initializing menu toggle
+            const initializeMenuToggle = () => {
+                const menuToggle = document.getElementById('menu-toggle-btn');
+                const menu = document.querySelector('.main-menu');
+                
+                if (menuToggle && menu) {
+                    setupMenuToggleEvents(menuToggle, menu, overlay);
+                } else {
+                    // Retry after a short delay if elements aren't ready
+                    setTimeout(initializeMenuToggle, 100);
+                }
+            };
             
-            if (menuToggle && menu) {
+            // Listen for header loaded event or initialize immediately if header exists
+            if (document.getElementById('menu-toggle-btn')) {
+                initializeMenuToggle();
+            } else {
+                document.addEventListener('headerLoaded', initializeMenuToggle);
+                // Fallback: try to initialize after a delay
+                setTimeout(initializeMenuToggle, 500);
+            }
+            
+            // Function to setup menu toggle events
+            function setupMenuToggleEvents(menuToggle, menu, overlay) {
                 // Toggle menu
                 menuToggle.addEventListener('click', (e) => {
                     e.stopPropagation();
@@ -49,6 +68,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         document.body.classList.remove('menu-open');
                     }
                 });
+                
+                console.log('Menu toggle functionality initialized');
             }
             
             // Set active menu item based on current page
