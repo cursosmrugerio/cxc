@@ -1084,3 +1084,69 @@ body.menu-open {
         color: #007bff;
     }
 }
+
+/* Propiedad form styles */
+#propiedadAddForm textarea, #propiedadEditForm textarea {
+    width: 100%;
+    padding: 1rem;
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    font-size: 1rem;
+    color: #495057;
+    background-color: #fff;
+    transition: all 0.3s ease;
+    resize: vertical;
+    min-height: 120px;
+    font-family: inherit;
+}
+
+#propiedadAddForm textarea:focus, #propiedadEditForm textarea:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    background-color: #f8f9fa;
+}
+
+#propiedadAddForm textarea::placeholder, #propiedadEditForm textarea::placeholder {
+    color: #adb5bd;
+    opacity: 1;
+}
+
+/* Propiedad form buttons */
+#propiedadAddForm button, #propiedadEditForm button {
+    padding: 1rem 2.5rem;
+    border: none;
+    border-radius: 50px;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    min-width: 200px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+#propiedadAddForm button[type="submit"], #propiedadEditForm button[type="submit"] {
+    background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+    color: white;
+    box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+}
+
+#propiedadAddForm button[type="submit"]:hover, #propiedadEditForm button[type="submit"]:hover {
+    background: linear-gradient(135deg, #45a049 0%, #3e8e41 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
+}
+
+#propiedadAddForm button[type="button"], #propiedadEditForm button[type="button"] {
+    background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
+    color: white;
+    box-shadow: 0 4px 15px rgba(108, 117, 125, 0.3);
+}
+
+#propiedadAddForm button[type="button"]:hover, #propiedadEditForm button[type="button"]:hover {
+    background: linear-gradient(135deg, #5a6268 0%, #495057 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(108, 117, 125, 0.4);
+}

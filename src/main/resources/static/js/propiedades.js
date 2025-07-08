@@ -58,31 +58,14 @@ document.addEventListener('DOMContentLoaded', () => {
             direccionCell.textContent = propiedad.direccionCompleta || 'N/A';
             direccionCell.setAttribute('data-label', 'Dirección');
             
-            // Superficie Total
-            const superficieTotalCell = row.insertCell();
-            superficieTotalCell.textContent = propiedad.superficieTotal ? 
-                `${propiedad.superficieTotal} m²` : 'N/A';
-            superficieTotalCell.setAttribute('data-label', 'Superficie Total');
-            
-            // Superficie Construida
-            const superficieConstruidaCell = row.insertCell();
-            superficieConstruidaCell.textContent = propiedad.superficieConstruida ? 
-                `${propiedad.superficieConstruida} m²` : 'N/A';
-            superficieConstruidaCell.setAttribute('data-label', 'Superficie Construida');
-            
             // Habitaciones
             const habitacionesCell = row.insertCell();
             habitacionesCell.textContent = propiedad.numeroHabitaciones || 'N/A';
             habitacionesCell.setAttribute('data-label', 'Habitaciones');
             
-            // Baños
-            const banosCell = row.insertCell();
-            banosCell.textContent = propiedad.numeroBanos || 'N/A';
-            banosCell.setAttribute('data-label', 'Baños');
-            
             // Estatus
             const estatusCell = row.insertCell();
-            estatusCell.innerHTML = getStatusBadge(propiedad.estatusPropiedad);
+            estatusCell.textContent = propiedad.estatusPropiedad || 'N/A';
             estatusCell.setAttribute('data-label', 'Estatus');
             
             // Actions column
@@ -107,13 +90,13 @@ document.addEventListener('DOMContentLoaded', () => {
     // Event listener for the Add Propiedad button
     if (addPropiedadButton) {
         addPropiedadButton.addEventListener('click', () => {
-            window.location.href = 'propiedades-add.html';
+            window.location.href = 'propiedad-add.html';
         });
     }
 
     // Function to edit a propiedad
     window.editPropiedad = (idPropiedad) => {
-        window.location.href = `propiedades-edit.html?id=${idPropiedad}`;
+        window.location.href = `propiedad-edit.html?id=${idPropiedad}`;
     };
 
     // Function to delete a propiedad

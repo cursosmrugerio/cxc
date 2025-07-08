@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editar Propiedad</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div id="header-container"></div>
+    <div id="menu-container"></div>
+
+    <div class="page-container">
+        <main class="container">
+        <h1>Editar Propiedad</h1>
+
+        <form id="propiedadEditForm">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="idInmobiliaria">ID Inmobiliaria:</label>
+                    <input type="number" id="idInmobiliaria" required placeholder="Ej: 1">
+                </div>
+
+                <div class="form-group">
+                    <label for="tipoPropiedad">Tipo de Propiedad:</label>
+                    <select id="tipoPropiedad">
+                        <option value="">Seleccione un tipo</option>
+                        <option value="CASA">Casa</option>
+                        <option value="DEPARTAMENTO">Departamento</option>
+                        <option value="OFICINA">Oficina</option>
+                        <option value="LOCAL">Local Comercial</option>
+                        <option value="TERRENO">Terreno</option>
+                        <option value="BODEGA">Bodega</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="direccionCompleta">Dirección Completa:</label>
+                <input type="text" id="direccionCompleta" placeholder="Ej: Av. Reforma 123, Col. Centro, CP 06000">
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="superficieTotal">Superficie Total (m²):</label>
+                    <input type="number" id="superficieTotal" step="0.01" placeholder="Ej: 150.50">
+                </div>
+
+                <div class="form-group">
+                    <label for="superficieConstruida">Superficie Construida (m²):</label>
+                    <input type="number" id="superficieConstruida" step="0.01" placeholder="Ej: 120.75">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="numeroHabitaciones">Número de Habitaciones:</label>
+                    <input type="number" id="numeroHabitaciones" min="0" placeholder="Ej: 3">
+                </div>
+
+                <div class="form-group">
+                    <label for="numeroBanos">Número de Baños:</label>
+                    <input type="number" id="numeroBanos" min="0" placeholder="Ej: 2">
+                </div>
+
+                <div class="form-group">
+                    <label for="estatusPropiedad">Estatus:</label>
+                    <select id="estatusPropiedad">
+                        <option value="DISPONIBLE">Disponible</option>
+                        <option value="OCUPADA">Ocupada</option>
+                        <option value="MANTENIMIENTO">Mantenimiento</option>
+                        <option value="VENDIDA">Vendida</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="caracteristicasEspeciales">Características Especiales:</label>
+                <textarea id="caracteristicasEspeciales" rows="4" placeholder="Ej: Jardín amplio, cochera techada, sistema de seguridad, vista panorámica..."></textarea>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit">Guardar Propiedad</button>
+                <button type="button" onclick="window.location.href='propiedades.html'">Cancelar</button>
+            </div>
+        </form>
+        </main>
+    </div>
+
+    <script src="js/auth.js"></script>
+    <script src="js/app.js"></script>
+    <script src="js/header.js"></script>
+    <script src="js/menu.js"></script>
+    <script src="js/propiedad-edit.js"></script>
+</body>
+</html>
