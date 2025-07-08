@@ -47,12 +47,26 @@ document.addEventListener('DOMContentLoaded', () => {
         inmobiliariaTableBody.innerHTML = '';
         inmobiliarias.forEach(inmobiliaria => {
             const row = inmobiliariaTableBody.insertRow();
-            row.insertCell().textContent = inmobiliaria.nombreComercial;
-            row.insertCell().textContent = inmobiliaria.razonSocial;
-            row.insertCell().textContent = inmobiliaria.rfcNit;
-            row.insertCell().textContent = inmobiliaria.ciudad;
-            row.insertCell().textContent = inmobiliaria.estado;
-            row.insertCell().textContent = inmobiliaria.estatus;
+            
+            // Nombre Comercial
+            const nombreCell = row.insertCell();
+            nombreCell.textContent = inmobiliaria.nombreComercial;
+            nombreCell.setAttribute('data-label', 'Nombre Comercial');
+            
+            // Razón Social
+            const razonCell = row.insertCell();
+            razonCell.textContent = inmobiliaria.razonSocial;
+            razonCell.setAttribute('data-label', 'Razón Social');
+            
+            // Ciudad
+            const ciudadCell = row.insertCell();
+            ciudadCell.textContent = inmobiliaria.ciudad;
+            ciudadCell.setAttribute('data-label', 'Ciudad');
+            
+            // Estatus
+            const estatusCell = row.insertCell();
+            estatusCell.textContent = inmobiliaria.estatus;
+            estatusCell.setAttribute('data-label', 'Estatus');
             
             // Actions column
             const actionsCell = row.insertCell();
@@ -64,6 +78,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     Eliminar
                 </button>
             `;
+            actionsCell.setAttribute('data-label', 'Acciones');
         });
     };
 
