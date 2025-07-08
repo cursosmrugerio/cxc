@@ -4,13 +4,50 @@ document.addEventListener('DOMContentLoaded', () => {
         .then(data => {
             document.getElementById('menu-container').innerHTML = data;
             
+            // Create overlay for mobile menu
+            const overlay = document.createElement('div');
+            overlay.className = 'menu-overlay';
+            document.body.appendChild(overlay);
+            
             // Initialize menu toggle functionality
             const menuToggle = document.getElementById('menu-toggle-btn');
             const menu = document.querySelector('.main-menu');
             
             if (menuToggle && menu) {
-                menuToggle.addEventListener('click', () => {
+                // Toggle menu
+                menuToggle.addEventListener('click', (e) => {
+                    e.stopPropagation();
                     menu.classList.toggle('open');
+                    overlay.classList.toggle('active');
+                    document.body.classList.toggle('menu-open');
+                });
+                
+                // Close menu when clicking overlay
+                overlay.addEventListener('click', () => {
+                    menu.classList.remove('open');
+                    overlay.classList.remove('active');
+                    document.body.classList.remove('menu-open');
+                });
+                
+                // Close menu when clicking outside on mobile
+                document.addEventListener('click', (e) => {
+                    if (window.innerWidth <= 768 && 
+                        menu.classList.contains('open') && 
+                        !menu.contains(e.target) && 
+                        !menuToggle.contains(e.target)) {
+                        menu.classList.remove('open');
+                        overlay.classList.remove('active');
+                        document.body.classList.remove('menu-open');
+                    }
+                });
+                
+                // Close menu on window resize if mobile menu is open
+                window.addEventListener('resize', () => {
+                    if (window.innerWidth > 768) {
+                        menu.classList.remove('open');
+                        overlay.classList.remove('active');
+                        document.body.classList.remove('menu-open');
+                    }
                 });
             }
             
@@ -20,9 +57,19 @@ document.addEventListener('DOMContentLoaded', () => {
             
             menuLinks.forEach(link => {
                 const linkPath = new URL(link.href).pathname;
-                if (linkPath === currentPath) {
+                if (linkPath === currentPath || 
+                    (currentPath.includes('inmobiliaria') && linkPath.includes('inmobiliaria'))) {
                     link.parentElement.classList.add('active');
                 }
+                
+                // Close mobile menu when clicking menu link
+                link.addEventListener('click', () => {
+                    if (window.innerWidth <= 768) {
+                        menu.classList.remove('open');
+                        overlay.classList.remove('active');
+                        document.body.classList.remove('menu-open');
+                    }
+                });
             });
         });
 });
