@@ -13,7 +13,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ActiveProfiles;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -103,7 +103,7 @@ class InmobiliariaRepositoryTest {
         inmobiliaria.setCodigoPostal(codigoPostal);
         inmobiliaria.setPersonaContacto(contacto);
         inmobiliaria.setEstatus(estatus);
-        inmobiliaria.setFechaRegistro(LocalDateTime.now());
+        inmobiliaria.setFechaRegistro(LocalDate.now());
         return inmobiliaria;
     }
 
@@ -319,7 +319,7 @@ class InmobiliariaRepositoryTest {
 
             // When
             Page<Inmobiliaria> result = inmobiliariaRepository.findByFilters(
-                    "Los Pinos", "CDMX", "Ciudad", "ACTIVE", "ILP", pageable);
+                    "Los Pinos", "Ciudad", "CDMX", "ACTIVE", pageable);
 
             // Then
             assertThat(result.getContent()).hasSize(1);
@@ -334,7 +334,7 @@ class InmobiliariaRepositoryTest {
 
             // When
             Page<Inmobiliaria> result = inmobiliariaRepository.findByFilters(
-                    null, "Jalisco", null, "ACTIVE", null, pageable);
+                    null, "Jalisco", null, "ACTIVE", pageable);
 
             // Then
             assertThat(result.getContent()).hasSize(1);
@@ -349,7 +349,7 @@ class InmobiliariaRepositoryTest {
 
             // When
             Page<Inmobiliaria> result = inmobiliariaRepository.findByFilters(
-                    null, null, null, null, null, pageable);
+                    null, null, null, null, pageable);
 
             // Then
             assertThat(result.getContent()).hasSize(3);
@@ -363,7 +363,7 @@ class InmobiliariaRepositoryTest {
 
             // When
             Page<Inmobiliaria> result = inmobiliariaRepository.findByFilters(
-                    null, null, null, null, null, pageable);
+                    null, null, null, null, pageable);
 
             // Then
             assertThat(result.getContent()).hasSize(2);
@@ -379,7 +379,7 @@ class InmobiliariaRepositoryTest {
 
             // When
             Page<Inmobiliaria> result = inmobiliariaRepository.findByFilters(
-                    "VALLE", "jalisco", "guadalajara", "active", "idv", pageable);
+                    "VALLE", "guadalajara", "jalisco", "active", pageable);
 
             // Then
             assertThat(result.getContent()).hasSize(1);
@@ -394,7 +394,7 @@ class InmobiliariaRepositoryTest {
 
             // When
             Page<Inmobiliaria> result = inmobiliariaRepository.findByFilters(
-                    "NotFound", null, null, null, null, pageable);
+                    "NotFound", null, null, null, pageable);
 
             // Then
             assertThat(result.getContent()).isEmpty();
@@ -429,7 +429,7 @@ class InmobiliariaRepositoryTest {
         @DisplayName("Should auto-generate fecha registro on persist")
         void shouldAutoGenerateFechaRegistroOnPersist() {
             // Given
-            LocalDateTime beforeSave = LocalDateTime.now().minusSeconds(1);
+            LocalDate beforeSave = LocalDate.now().minusDays(1);
             Inmobiliaria newInmobiliaria = createInmobiliaria(
                     "Auto Date Test", "Auto Date Legal", "ADT123456789",
                     "111-111-1111", "autodate@test.com", "Auto Date Address",
@@ -439,12 +439,12 @@ class InmobiliariaRepositoryTest {
 
             // When
             Inmobiliaria saved = entityManager.persistAndFlush(newInmobiliaria);
-            LocalDateTime afterSave = LocalDateTime.now().plusSeconds(1);
+            LocalDate afterSave = LocalDate.now().plusDays(1);
 
             // Then
             assertThat(saved.getFechaRegistro()).isNotNull();
-            assertThat(saved.getFechaRegistro()).isAfter(beforeSave);
-            assertThat(saved.getFechaRegistro()).isBefore(afterSave);
+            assertThat(saved.getFechaRegistro()).isAfterOrEqualTo(beforeSave);
+            assertThat(saved.getFechaRegistro()).isBeforeOrEqualTo(afterSave);
         }
 
         @Test
@@ -495,7 +495,7 @@ class InmobiliariaRepositoryTest {
             // When
             long startTime = System.currentTimeMillis();
             Page<Inmobiliaria> result = inmobiliariaRepository.findByFilters(
-                    null, null, null, "ACTIVE", null, PageRequest.of(0, 20));
+                    null, null, null, "ACTIVE", PageRequest.of(0, 20));
             long endTime = System.currentTimeMillis();
 
             // Then

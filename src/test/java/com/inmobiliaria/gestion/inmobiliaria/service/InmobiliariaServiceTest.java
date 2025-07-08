@@ -16,7 +16,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -65,7 +65,7 @@ class InmobiliariaServiceTest {
         inmobiliaria.setCodigoPostal("06700");
         inmobiliaria.setPersonaContacto("María González");
         inmobiliaria.setEstatus("ACTIVE");
-        inmobiliaria.setFechaRegistro(LocalDateTime.now());
+        inmobiliaria.setFechaRegistro(LocalDate.now());
         return inmobiliaria;
     }
 
@@ -82,8 +82,8 @@ class InmobiliariaServiceTest {
                 "CDMX",
                 "06700",
                 "María González",
-                "ACTIVE",
-                LocalDateTime.now()
+                LocalDate.now(),
+                "ACTIVE"
         );
     }
 
@@ -131,25 +131,26 @@ class InmobiliariaServiceTest {
             when(inmobiliariaRepository.findById(1L)).thenReturn(Optional.of(testInmobiliaria));
 
             // When
-            InmobiliariaDTO result = inmobiliariaService.findById(1L);
+            Optional<InmobiliariaDTO> result = inmobiliariaService.findById(1L);
 
             // Then
-            assertThat(result).isNotNull();
-            assertThat(result.idInmobiliaria()).isEqualTo(1L);
-            assertThat(result.nombreComercial()).isEqualTo("Inmobiliaria Los Pinos");
+            assertThat(result).isPresent();
+            assertThat(result.get().idInmobiliaria()).isEqualTo(1L);
+            assertThat(result.get().nombreComercial()).isEqualTo("Inmobiliaria Los Pinos");
             verify(inmobiliariaRepository, times(1)).findById(1L);
         }
 
         @Test
-        @DisplayName("Should throw exception when inmobiliaria not found by ID")
-        void shouldThrowExceptionWhenInmobiliariaNotFoundById() {
+        @DisplayName("Should return empty when inmobiliaria not found by ID")
+        void shouldReturnEmptyWhenInmobiliariaNotFoundById() {
             // Given
             when(inmobiliariaRepository.findById(999L)).thenReturn(Optional.empty());
 
-            // When & Then
-            assertThatThrownBy(() -> inmobiliariaService.findById(999L))
-                    .isInstanceOf(RuntimeException.class)
-                    .hasMessageContaining("Inmobiliaria not found with id: 999");
+            // When
+            Optional<InmobiliariaDTO> result = inmobiliariaService.findById(999L);
+
+            // Then
+            assertThat(result).isEmpty();
             verify(inmobiliariaRepository, times(1)).findById(999L);
         }
 
@@ -160,25 +161,25 @@ class InmobiliariaServiceTest {
             when(inmobiliariaRepository.findByRfcNit("ILP123456789")).thenReturn(Optional.of(testInmobiliaria));
 
             // When
-            InmobiliariaDTO result = inmobiliariaService.findByRfcNit("ILP123456789");
+            Optional<InmobiliariaDTO> result = inmobiliariaService.findByRfcNit("ILP123456789");
 
             // Then
-            assertThat(result).isNotNull();
-            assertThat(result.rfcNit()).isEqualTo("ILP123456789");
+            assertThat(result).isPresent();
+            assertThat(result.get().rfcNit()).isEqualTo("ILP123456789");
             verify(inmobiliariaRepository, times(1)).findByRfcNit("ILP123456789");
         }
 
         @Test
-        @DisplayName("Should return null when RFC/NIT not found")
-        void shouldReturnNullWhenRfcNitNotFound() {
+        @DisplayName("Should return empty when RFC/NIT not found")
+        void shouldReturnEmptyWhenRfcNitNotFound() {
             // Given
             when(inmobiliariaRepository.findByRfcNit("NOTFOUND")).thenReturn(Optional.empty());
 
             // When
-            InmobiliariaDTO result = inmobiliariaService.findByRfcNit("NOTFOUND");
+            Optional<InmobiliariaDTO> result = inmobiliariaService.findByRfcNit("NOTFOUND");
 
             // Then
-            assertThat(result).isNull();
+            assertThat(result).isEmpty();
             verify(inmobiliariaRepository, times(1)).findByRfcNit("NOTFOUND");
         }
 
@@ -270,7 +271,7 @@ class InmobiliariaServiceTest {
             InmobiliariaDTO updateDTO = new InmobiliariaDTO(
                     1L, "Updated Name", "Updated Legal", "ILP123456789", "555-999-9999",
                     "updated@test.com", "Updated Address", "Updated City", "Updated State",
-                    "99999", "Updated Contact", "ACTIVE", LocalDateTime.now()
+                    "99999", "Updated Contact", LocalDate.now(), "ACTIVE"
             );
 
             when(inmobiliariaRepository.findById(1L)).thenReturn(Optional.of(testInmobiliaria));
@@ -474,58 +475,7 @@ class InmobiliariaServiceTest {
         }
     }
 
-    @Nested
-    @DisplayName("Conversion Operations")
-    class ConversionOperations {
-
-        @Test
-        @DisplayName("Should convert entity to DTO correctly")
-        void shouldConvertEntityToDtoCorrectly() {
-            // When
-            InmobiliariaDTO result = inmobiliariaService.convertToDTO(testInmobiliaria);
-
-            // Then
-            assertThat(result).isNotNull();
-            assertThat(result.idInmobiliaria()).isEqualTo(testInmobiliaria.getIdInmobiliaria());
-            assertThat(result.nombreComercial()).isEqualTo(testInmobiliaria.getNombreComercial());
-            assertThat(result.rfcNit()).isEqualTo(testInmobiliaria.getRfcNit());
-            assertThat(result.estatus()).isEqualTo(testInmobiliaria.getEstatus());
-        }
-
-        @Test
-        @DisplayName("Should convert DTO to entity correctly")
-        void shouldConvertDtoToEntityCorrectly() {
-            // When
-            Inmobiliaria result = inmobiliariaService.convertToEntity(testInmobiliariaDTO);
-
-            // Then
-            assertThat(result).isNotNull();
-            assertThat(result.getIdInmobiliaria()).isEqualTo(testInmobiliariaDTO.idInmobiliaria());
-            assertThat(result.getNombreComercial()).isEqualTo(testInmobiliariaDTO.nombreComercial());
-            assertThat(result.getRfcNit()).isEqualTo(testInmobiliariaDTO.rfcNit());
-            assertThat(result.getEstatus()).isEqualTo(testInmobiliariaDTO.estatus());
-        }
-
-        @Test
-        @DisplayName("Should handle null values in conversion")
-        void shouldHandleNullValuesInConversion() {
-            // Given
-            Inmobiliaria entityWithNulls = new Inmobiliaria();
-            entityWithNulls.setIdInmobiliaria(1L);
-            entityWithNulls.setNombreComercial("Test");
-            entityWithNulls.setRfcNit("TEST123");
-
-            // When
-            InmobiliariaDTO result = inmobiliariaService.convertToDTO(entityWithNulls);
-
-            // Then
-            assertThat(result).isNotNull();
-            assertThat(result.idInmobiliaria()).isEqualTo(1L);
-            assertThat(result.nombreComercial()).isEqualTo("Test");
-            assertThat(result.telefonoPrincipal()).isNull();
-            assertThat(result.emailContacto()).isNull();
-        }
-    }
+    // Conversion methods are private, so they are tested indirectly through public methods
 
     @Nested
     @DisplayName("Search and Filter Operations")
@@ -539,18 +489,18 @@ class InmobiliariaServiceTest {
             Page<Inmobiliaria> page = new PageImpl<>(Arrays.asList(testInmobiliaria));
             
             when(inmobiliariaRepository.findByFilters(
-                    anyString(), anyString(), anyString(), anyString(), anyString(), any(Pageable.class)))
+                    anyString(), anyString(), anyString(), anyString(), any(Pageable.class)))
                     .thenReturn(page);
 
             // When
             Page<InmobiliariaDTO> result = inmobiliariaService.findByFilters(
-                    "Los Pinos", "CDMX", "Ciudad de México", "ACTIVE", "ILP", pageable);
+                    "Los Pinos", "Ciudad de México", "CDMX", "ACTIVE", pageable);
 
             // Then
             assertThat(result.getContent()).hasSize(1);
             assertThat(result.getContent().get(0).nombreComercial()).isEqualTo("Inmobiliaria Los Pinos");
             verify(inmobiliariaRepository, times(1)).findByFilters(
-                    anyString(), anyString(), anyString(), anyString(), anyString(), any(Pageable.class));
+                    anyString(), anyString(), anyString(), anyString(), any(Pageable.class));
         }
 
         @Test
@@ -561,12 +511,12 @@ class InmobiliariaServiceTest {
             Page<Inmobiliaria> emptyPage = new PageImpl<>(Arrays.asList());
             
             when(inmobiliariaRepository.findByFilters(
-                    anyString(), anyString(), anyString(), anyString(), anyString(), any(Pageable.class)))
+                    anyString(), anyString(), anyString(), anyString(), any(Pageable.class)))
                     .thenReturn(emptyPage);
 
             // When
             Page<InmobiliariaDTO> result = inmobiliariaService.findByFilters(
-                    "NotFound", null, null, null, null, pageable);
+                    "NotFound", null, null, null, pageable);
 
             // Then
             assertThat(result.getContent()).isEmpty();

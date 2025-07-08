@@ -10,7 +10,7 @@ import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -39,8 +39,8 @@ class InmobiliariaDTOValidationTest {
                 "CDMX",
                 "06700",
                 "María González",
-                "ACTIVE",
-                LocalDateTime.now()
+                LocalDate.now(),
+                "ACTIVE"
         );
     }
 
@@ -77,8 +77,8 @@ class InmobiliariaDTOValidationTest {
                     null, // Optional
                     null, // Optional
                     null, // Optional
-                    "ACTIVE",
-                    null
+                    null,
+                    "ACTIVE"
             );
 
             // When
@@ -99,7 +99,7 @@ class InmobiliariaDTOValidationTest {
             // Given
             InmobiliariaDTO dto = new InmobiliariaDTO(
                     1L, null, "Legal Name", "RFC123", "555-123-4567", "test@test.com",
-                    "Address", "City", "State", "12345", "Contact", "ACTIVE", LocalDateTime.now()
+                    "Address", "City", "State", "12345", "Contact", LocalDate.now(), "ACTIVE"
             );
 
             // When
@@ -117,7 +117,7 @@ class InmobiliariaDTOValidationTest {
             // Given
             InmobiliariaDTO dto = new InmobiliariaDTO(
                     1L, "Commercial Name", null, "RFC123", "555-123-4567", "test@test.com",
-                    "Address", "City", "State", "12345", "Contact", "ACTIVE", LocalDateTime.now()
+                    "Address", "City", "State", "12345", "Contact", LocalDate.now(), "ACTIVE"
             );
 
             // When
@@ -134,7 +134,7 @@ class InmobiliariaDTOValidationTest {
             // Given
             InmobiliariaDTO dto = new InmobiliariaDTO(
                     1L, "Commercial Name", "Legal Name", null, "555-123-4567", "test@test.com",
-                    "Address", "City", "State", "12345", "Contact", "ACTIVE", LocalDateTime.now()
+                    "Address", "City", "State", "12345", "Contact", LocalDate.now(), "ACTIVE"
             );
 
             // When
@@ -151,7 +151,7 @@ class InmobiliariaDTOValidationTest {
             // Given
             InmobiliariaDTO dto = new InmobiliariaDTO(
                     1L, "Commercial Name", "Legal Name", "RFC123", "555-123-4567", "test@test.com",
-                    "Address", "City", "State", "12345", "Contact", null, LocalDateTime.now()
+                    "Address", "City", "State", "12345", "Contact", LocalDate.now(), null
             );
 
             // When
@@ -174,7 +174,7 @@ class InmobiliariaDTOValidationTest {
             String tooLongName = "A".repeat(101); // Assuming max length is 100
             InmobiliariaDTO dto = new InmobiliariaDTO(
                     1L, tooLongName, "Legal Name", "RFC123", "555-123-4567", "test@test.com",
-                    "Address", "City", "State", "12345", "Contact", "ACTIVE", LocalDateTime.now()
+                    "Address", "City", "State", "12345", "Contact", LocalDate.now(), "ACTIVE"
             );
 
             Set<ConstraintViolation<InmobiliariaDTO>> violations = validator.validate(dto);
@@ -193,7 +193,7 @@ class InmobiliariaDTOValidationTest {
             String tooLongRfc = "A".repeat(21); // Assuming max length is 20
             InmobiliariaDTO dto = new InmobiliariaDTO(
                     1L, "Commercial Name", "Legal Name", tooLongRfc, "555-123-4567", "test@test.com",
-                    "Address", "City", "State", "12345", "Contact", "ACTIVE", LocalDateTime.now()
+                    "Address", "City", "State", "12345", "Contact", LocalDate.now(), "ACTIVE"
             );
 
             Set<ConstraintViolation<InmobiliariaDTO>> violations = validator.validate(dto);
@@ -212,7 +212,7 @@ class InmobiliariaDTOValidationTest {
             String tooLongEmail = "a".repeat(90) + "@test.com"; // Assuming max length is 100
             InmobiliariaDTO dto = new InmobiliariaDTO(
                     1L, "Commercial Name", "Legal Name", "RFC123", "555-123-4567", tooLongEmail,
-                    "Address", "City", "State", "12345", "Contact", "ACTIVE", LocalDateTime.now()
+                    "Address", "City", "State", "12345", "Contact", LocalDate.now(), "ACTIVE"
             );
 
             Set<ConstraintViolation<InmobiliariaDTO>> violations = validator.validate(dto);
@@ -243,7 +243,7 @@ class InmobiliariaDTOValidationTest {
             for (String email : validEmails) {
                 InmobiliariaDTO dto = new InmobiliariaDTO(
                         1L, "Commercial Name", "Legal Name", "RFC123", "555-123-4567", email,
-                        "Address", "City", "State", "12345", "Contact", "ACTIVE", LocalDateTime.now()
+                        "Address", "City", "State", "12345", "Contact", LocalDate.now(), "ACTIVE"
                 );
 
                 Set<ConstraintViolation<InmobiliariaDTO>> violations = validator.validate(dto);
@@ -273,7 +273,7 @@ class InmobiliariaDTOValidationTest {
             for (String email : invalidEmails) {
                 InmobiliariaDTO dto = new InmobiliariaDTO(
                         1L, "Commercial Name", "Legal Name", "RFC123", "555-123-4567", email,
-                        "Address", "City", "State", "12345", "Contact", "ACTIVE", LocalDateTime.now()
+                        "Address", "City", "State", "12345", "Contact", LocalDate.now(), "ACTIVE"
                 );
 
                 Set<ConstraintViolation<InmobiliariaDTO>> violations = validator.validate(dto);
@@ -294,7 +294,7 @@ class InmobiliariaDTOValidationTest {
             // Given
             InmobiliariaDTO dto = new InmobiliariaDTO(
                     1L, "Commercial Name", "Legal Name", "RFC123", "555-123-4567", null,
-                    "Address", "City", "State", "12345", "Contact", "ACTIVE", LocalDateTime.now()
+                    "Address", "City", "State", "12345", "Contact", LocalDate.now(), "ACTIVE"
             );
 
             // When
@@ -328,8 +328,8 @@ class InmobiliariaDTOValidationTest {
                     null, // Optional - estado
                     null, // Optional - codigo postal
                     null, // Optional - persona contacto
-                    "ACTIVE", // Required
-                    LocalDateTime.now()
+                    LocalDate.now(),
+                    "ACTIVE" // Required
             );
 
             // When
@@ -355,8 +355,8 @@ class InmobiliariaDTOValidationTest {
                     "", // Optional - estado
                     "", // Optional - codigo postal
                     "", // Optional - persona contacto
-                    "ACTIVE", // Required
-                    LocalDateTime.now()
+                    LocalDate.now(),
+                    "ACTIVE" // Required
             );
 
             // When
@@ -385,7 +385,7 @@ class InmobiliariaDTOValidationTest {
             for (String status : validStatuses) {
                 InmobiliariaDTO dto = new InmobiliariaDTO(
                         1L, "Commercial Name", "Legal Name", "RFC123", "555-123-4567", "test@test.com",
-                        "Address", "City", "State", "12345", "Contact", status, LocalDateTime.now()
+                        "Address", "City", "State", "12345", "Contact", LocalDate.now(), status
                 );
 
                 Set<ConstraintViolation<InmobiliariaDTO>> violations = validator.validate(dto);
@@ -420,8 +420,8 @@ class InmobiliariaDTOValidationTest {
                     "J", // Minimum length
                     "12345", // Typical postal code
                     "K", // Minimum length
-                    "ACTIVE",
-                    LocalDateTime.now()
+                    LocalDate.now(),
+                    "ACTIVE"
             );
 
             Set<ConstraintViolation<InmobiliariaDTO>> violations = validator.validate(dto);
@@ -449,8 +449,8 @@ class InmobiliariaDTOValidationTest {
                     "State",
                     "12345",
                     "Contact",
-                    "ACTIVE",
-                    null // Date should be null for new entities
+                    LocalDate.now(),
+                    "ACTIVE"
             );
 
             // When
@@ -484,8 +484,8 @@ class InmobiliariaDTOValidationTest {
                     "State",
                     "12345",
                     "Contact",
-                    null, // Invalid - required
-                    LocalDateTime.now()
+                    LocalDate.now(),
+                    null // Invalid - required
             );
 
             // When

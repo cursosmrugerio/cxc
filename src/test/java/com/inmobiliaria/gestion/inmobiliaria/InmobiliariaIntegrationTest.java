@@ -22,7 +22,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
 
@@ -83,7 +83,7 @@ class InmobiliariaIntegrationTest {
     }
 
     private String generateTokenForUser(String username, List<String> roles) {
-        return jwtUtil.generateToken(username, roles);
+        return jwtUtil.generateTokenFromUsername(username);
     }
 
     private Inmobiliaria createTestInmobiliaria() {
@@ -99,7 +99,7 @@ class InmobiliariaIntegrationTest {
         inmobiliaria.setCodigoPostal("06700");
         inmobiliaria.setPersonaContacto("María González");
         inmobiliaria.setEstatus("ACTIVE");
-        inmobiliaria.setFechaRegistro(LocalDateTime.now());
+        inmobiliaria.setFechaRegistro(LocalDate.now());
         return inmobiliaria;
     }
 
@@ -116,8 +116,8 @@ class InmobiliariaIntegrationTest {
                 "Jalisco",
                 "44100",
                 "Juan Pérez",
-                "ACTIVE",
-                null
+                null,
+                "ACTIVE"
         );
     }
 
@@ -139,7 +139,7 @@ class InmobiliariaIntegrationTest {
             mockMvc.perform(get("/api/v1/inmobiliarias")
                             .header("Authorization", "Bearer " + userToken))
                     .andDo(print())
-                    .andExpected(status().isOk());
+                    .andExpect(status().isOk());
         }
 
         @Test
@@ -161,7 +161,7 @@ class InmobiliariaIntegrationTest {
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(newInmobiliaria)))
                     .andDo(print())
-                    .andExpected(status().isCreated());
+                    .andExpect(status().isCreated());
         }
 
         @Test
@@ -179,8 +179,8 @@ class InmobiliariaIntegrationTest {
                     testInmobiliaria.getEstado(),
                     testInmobiliaria.getCodigoPostal(),
                     testInmobiliaria.getPersonaContacto(),
-                    testInmobiliaria.getEstatus(),
-                    testInmobiliaria.getFechaRegistro()
+                    testInmobiliaria.getFechaRegistro(),
+                    testInmobiliaria.getEstatus()
             );
 
             // User should not be able to update
@@ -197,7 +197,7 @@ class InmobiliariaIntegrationTest {
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(updateData)))
                     .andDo(print())
-                    .andExpected(status().isOk());
+                    .andExpect(status().isOk());
         }
 
         @Test
@@ -213,7 +213,7 @@ class InmobiliariaIntegrationTest {
             mockMvc.perform(delete("/api/v1/inmobiliarias/{id}", testInmobiliaria.getIdInmobiliaria())
                             .header("Authorization", "Bearer " + adminToken))
                     .andDo(print())
-                    .andExpected(status().isNoContent());
+                    .andExpect(status().isNoContent());
         }
     }
 
@@ -232,9 +232,9 @@ class InmobiliariaIntegrationTest {
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(newInmobiliaria)))
                     .andDo(print())
-                    .andExpected(status().isCreated())
-                    .andExpected(jsonPath("$.nombreComercial", is("Nueva Inmobiliaria")))
-                    .andExpected(jsonPath("$.rfcNit", is("NIN987654321")))
+                    .andExpect(status().isCreated())
+                    .andExpect(jsonPath("$.nombreComercial", is("Nueva Inmobiliaria")))
+                    .andExpect(jsonPath("$.rfcNit", is("NIN987654321")))
                     .andReturn()
                     .getResponse()
                     .getContentAsString();
@@ -246,16 +246,16 @@ class InmobiliariaIntegrationTest {
             mockMvc.perform(get("/api/v1/inmobiliarias/{id}", createdId)
                             .header("Authorization", "Bearer " + userToken))
                     .andDo(print())
-                    .andExpected(status().isOk())
-                    .andExpected(jsonPath("$.idInmobiliaria", is(createdId.intValue())))
-                    .andExpected(jsonPath("$.nombreComercial", is("Nueva Inmobiliaria")));
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.idInmobiliaria", is(createdId.intValue())))
+                    .andExpect(jsonPath("$.nombreComercial", is("Nueva Inmobiliaria")));
 
             // 3. Update
             InmobiliariaDTO updateData = new InmobiliariaDTO(
                     createdId, "Updated Nueva Inmobiliaria", created.razonSocial(), created.rfcNit(),
                     created.telefonoPrincipal(), created.emailContacto(), created.direccionCompleta(),
                     created.ciudad(), created.estado(), created.codigoPostal(), created.personaContacto(),
-                    created.estatus(), created.fechaRegistro()
+                    created.fechaRegistro(), created.estatus()
             );
 
             mockMvc.perform(put("/api/v1/inmobiliarias/{id}", createdId)
@@ -263,20 +263,20 @@ class InmobiliariaIntegrationTest {
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(updateData)))
                     .andDo(print())
-                    .andExpected(status().isOk())
-                    .andExpected(jsonPath("$.nombreComercial", is("Updated Nueva Inmobiliaria")));
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.nombreComercial", is("Updated Nueva Inmobiliaria")));
 
             // 4. Delete
             mockMvc.perform(delete("/api/v1/inmobiliarias/{id}", createdId)
                             .header("Authorization", "Bearer " + adminToken))
                     .andDo(print())
-                    .andExpected(status().isNoContent());
+                    .andExpect(status().isNoContent());
 
             // 5. Verify deletion
             mockMvc.perform(get("/api/v1/inmobiliarias/{id}", createdId)
                             .header("Authorization", "Bearer " + userToken))
                     .andDo(print())
-                    .andExpected(status().isNotFound());
+                    .andExpect(status().isNotFound());
         }
 
         @Test
@@ -285,7 +285,7 @@ class InmobiliariaIntegrationTest {
             InmobiliariaDTO duplicateRfc = new InmobiliariaDTO(
                     null, "Duplicate RFC", "Duplicate Legal", "ILP123456789", // Same RFC as test data
                     "999-999-9999", "duplicate@test.com", "Duplicate Address",
-                    "Duplicate City", "Duplicate State", "99999", "Duplicate Contact", "ACTIVE", null
+                    "Duplicate City", "Duplicate State", "99999", "Duplicate Contact", null, "ACTIVE"
             );
 
             // Should reject duplicate RFC/NIT
@@ -294,7 +294,7 @@ class InmobiliariaIntegrationTest {
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(duplicateRfc)))
                     .andDo(print())
-                    .andExpected(status().isBadRequest());
+                    .andExpect(status().isBadRequest());
         }
     }
 
@@ -317,7 +317,7 @@ class InmobiliariaIntegrationTest {
             inmobiliaria2.setCodigoPostal("44100");
             inmobiliaria2.setPersonaContacto("Juan Pérez");
             inmobiliaria2.setEstatus("ACTIVE");
-            inmobiliaria2.setFechaRegistro(LocalDateTime.now());
+            inmobiliaria2.setFechaRegistro(LocalDate.now());
             inmobiliariaRepository.save(inmobiliaria2);
 
             Inmobiliaria inmobiliaria3 = new Inmobiliaria();
@@ -332,7 +332,7 @@ class InmobiliariaIntegrationTest {
             inmobiliaria3.setCodigoPostal("64000");
             inmobiliaria3.setPersonaContacto("Ana López");
             inmobiliaria3.setEstatus("INACTIVE");
-            inmobiliaria3.setFechaRegistro(LocalDateTime.now());
+            inmobiliaria3.setFechaRegistro(LocalDate.now());
             inmobiliariaRepository.save(inmobiliaria3);
         }
 
@@ -345,9 +345,9 @@ class InmobiliariaIntegrationTest {
                             .param("estado", "Jalisco")
                             .param("estatus", "ACTIVE"))
                     .andDo(print())
-                    .andExpected(status().isOk())
-                    .andExpected(jsonPath("$.content", hasSize(1)))
-                    .andExpected(jsonPath("$.content[0].nombreComercial", is("Inmobiliaria del Valle")));
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.content", hasSize(1)))
+                    .andExpect(jsonPath("$.content[0].nombreComercial", is("Inmobiliaria del Valle")));
         }
 
         @Test
@@ -360,10 +360,10 @@ class InmobiliariaIntegrationTest {
                             .param("sortBy", "nombreComercial")
                             .param("sortDir", "asc"))
                     .andDo(print())
-                    .andExpected(status().isOk())
-                    .andExpected(jsonPath("$.content", hasSize(2)))
-                    .andExpected(jsonPath("$.totalElements", is(3)))
-                    .andExpected(jsonPath("$.totalPages", is(2)));
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.content", hasSize(2)))
+                    .andExpect(jsonPath("$.totalElements", is(3)))
+                    .andExpect(jsonPath("$.totalPages", is(2)));
         }
 
         @Test
@@ -372,14 +372,14 @@ class InmobiliariaIntegrationTest {
             mockMvc.perform(get("/api/v1/inmobiliarias/status/ACTIVE")
                             .header("Authorization", "Bearer " + userToken))
                     .andDo(print())
-                    .andExpected(status().isOk())
-                    .andExpected(jsonPath("$", hasSize(2)));
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$", hasSize(2)));
 
             mockMvc.perform(get("/api/v1/inmobiliarias/status/INACTIVE")
                             .header("Authorization", "Bearer " + userToken))
                     .andDo(print())
-                    .andExpected(status().isOk())
-                    .andExpected(jsonPath("$", hasSize(1)));
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$", hasSize(1)));
         }
 
         @Test
@@ -388,10 +388,10 @@ class InmobiliariaIntegrationTest {
             mockMvc.perform(get("/api/v1/inmobiliarias/statistics")
                             .header("Authorization", "Bearer " + userToken))
                     .andDo(print())
-                    .andExpected(status().isOk())
-                    .andExpected(jsonPath("$.totalInmobiliarias", is(3)))
-                    .andExpected(jsonPath("$.activeInmobiliarias", is(2)))
-                    .andExpected(jsonPath("$.inactiveInmobiliarias", is(1)));
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.totalInmobiliarias", is(3)))
+                    .andExpect(jsonPath("$.activeInmobiliarias", is(2)))
+                    .andExpect(jsonPath("$.inactiveInmobiliarias", is(1)));
         }
 
         @Test
@@ -400,14 +400,14 @@ class InmobiliariaIntegrationTest {
             mockMvc.perform(get("/api/v1/inmobiliarias/cities")
                             .header("Authorization", "Bearer " + userToken))
                     .andDo(print())
-                    .andExpected(status().isOk())
-                    .andExpected(jsonPath("$", hasSize(3)));
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$", hasSize(3)));
 
             mockMvc.perform(get("/api/v1/inmobiliarias/states")
                             .header("Authorization", "Bearer " + userToken))
                     .andDo(print())
-                    .andExpected(status().isOk())
-                    .andExpected(jsonPath("$", hasSize(3)));
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$", hasSize(3)));
         }
     }
 
@@ -419,7 +419,7 @@ class InmobiliariaIntegrationTest {
         @DisplayName("Should validate required fields")
         void shouldValidateRequiredFields() throws Exception {
             InmobiliariaDTO invalidData = new InmobiliariaDTO(
-                    null, "", "", "", "", "", "", "", "", "", "", "", null // Empty required fields
+                    null, "", "", "", "", "", "", "", "", "", "", null, "" // Empty required fields
             );
 
             mockMvc.perform(post("/api/v1/inmobiliarias")
@@ -427,7 +427,7 @@ class InmobiliariaIntegrationTest {
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(invalidData)))
                     .andDo(print())
-                    .andExpected(status().isBadRequest());
+                    .andExpect(status().isBadRequest());
         }
 
         @Test
@@ -438,8 +438,8 @@ class InmobiliariaIntegrationTest {
                     invalidEmail.idInmobiliaria(), invalidEmail.nombreComercial(), invalidEmail.razonSocial(),
                     "VALID123456789", invalidEmail.telefonoPrincipal(), "invalid-email", // Invalid email
                     invalidEmail.direccionCompleta(), invalidEmail.ciudad(), invalidEmail.estado(),
-                    invalidEmail.codigoPostal(), invalidEmail.personaContacto(), invalidEmail.estatus(),
-                    invalidEmail.fechaRegistro()
+                    invalidEmail.codigoPostal(), invalidEmail.personaContacto(),
+                    invalidEmail.fechaRegistro(), invalidEmail.estatus()
             );
 
             mockMvc.perform(post("/api/v1/inmobiliarias")
@@ -447,7 +447,7 @@ class InmobiliariaIntegrationTest {
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(invalidEmail)))
                     .andDo(print())
-                    .andExpected(status().isBadRequest());
+                    .andExpect(status().isBadRequest());
         }
     }
 
@@ -462,8 +462,8 @@ class InmobiliariaIntegrationTest {
                             .header("Authorization", "Bearer " + adminToken)
                             .param("estatus", "INACTIVE"))
                     .andDo(print())
-                    .andExpected(status().isOk())
-                    .andExpected(jsonPath("$.estatus", is("INACTIVE")));
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.estatus", is("INACTIVE")));
 
             // Verify the change in database
             Inmobiliaria updated = inmobiliariaRepository.findById(testInmobiliaria.getIdInmobiliaria()).orElse(null);
@@ -478,7 +478,7 @@ class InmobiliariaIntegrationTest {
                             .header("Authorization", "Bearer " + adminToken)
                             .param("estatus", "INVALID_STATUS"))
                     .andDo(print())
-                    .andExpected(status().isBadRequest());
+                    .andExpect(status().isBadRequest());
         }
     }
 
@@ -492,7 +492,7 @@ class InmobiliariaIntegrationTest {
             mockMvc.perform(get("/api/v1/inmobiliarias/999999")
                             .header("Authorization", "Bearer " + userToken))
                     .andDo(print())
-                    .andExpected(status().isNotFound());
+                    .andExpect(status().isNotFound());
         }
 
         @Test
@@ -501,7 +501,7 @@ class InmobiliariaIntegrationTest {
             mockMvc.perform(get("/api/v1/inmobiliarias/rfc/NOTFOUND")
                             .header("Authorization", "Bearer " + userToken))
                     .andDo(print())
-                    .andExpected(status().isNotFound());
+                    .andExpect(status().isNotFound());
         }
 
         @Test
@@ -512,7 +512,7 @@ class InmobiliariaIntegrationTest {
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("{ invalid json }"))
                     .andDo(print())
-                    .andExpected(status().isBadRequest());
+                    .andExpect(status().isBadRequest());
         }
     }
 }

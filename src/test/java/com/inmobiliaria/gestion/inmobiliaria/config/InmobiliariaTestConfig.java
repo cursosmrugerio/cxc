@@ -6,7 +6,7 @@ import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 /**
  * Test configuration class for Inmobiliaria tests.
@@ -77,7 +77,7 @@ public class InmobiliariaTestConfig {
             inmobiliaria.setCodigoPostal(codigoPostal);
             inmobiliaria.setPersonaContacto(contacto);
             inmobiliaria.setEstatus(estatus);
-            inmobiliaria.setFechaRegistro(LocalDateTime.now());
+            inmobiliaria.setFechaRegistro(LocalDate.now());
             return inmobiliaria;
         }
 
@@ -86,7 +86,7 @@ public class InmobiliariaTestConfig {
                                                   String estado, String codigoPostal, String contacto, String estatus) {
             return new InmobiliariaDTO(
                     id, nombreComercial, razonSocial, rfcNit, telefono, email, direccion,
-                    ciudad, estado, codigoPostal, contacto, estatus, LocalDateTime.now()
+                    ciudad, estado, codigoPostal, contacto, LocalDate.now(), estatus
             );
         }
 
@@ -151,8 +151,8 @@ public class InmobiliariaTestConfig {
                     null, // Optional
                     null, // Optional
                     null, // Optional
-                    "ACTIVE",
-                    null
+                    LocalDate.now(),
+                    "ACTIVE"
             );
         }
 
