@@ -53,6 +53,17 @@ document.addEventListener('DOMContentLoaded', () => {
             row.insertCell().textContent = inmobiliaria.ciudad;
             row.insertCell().textContent = inmobiliaria.estado;
             row.insertCell().textContent = inmobiliaria.estatus;
+            
+            // Actions column
+            const actionsCell = row.insertCell();
+            actionsCell.innerHTML = `
+                <button class="edit-button" onclick="editInmobiliaria(${inmobiliaria.idInmobiliaria})">
+                    Editar
+                </button>
+                <button class="delete-button" onclick="deleteInmobiliaria(${inmobiliaria.idInmobiliaria}, '${inmobiliaria.nombreComercial}')">
+                    Eliminar
+                </button>
+            `;
         });
     };
 
@@ -67,4 +78,46 @@ document.addEventListener('DOMContentLoaded', () => {
             window.location.href = 'inmobiliaria-add.html';
         });
     }
+
+    // Function to edit an inmobiliaria
+    window.editInmobiliaria = (idInmobiliaria) => {
+        window.location.href = `inmobiliaria-edit.html?id=${idInmobiliaria}`;
+    };
+
+    // Function to delete an inmobiliaria
+    window.deleteInmobiliaria = async (idInmobiliaria, nombreComercial) => {
+        if (confirm(`¿Está seguro que desea eliminar la inmobiliaria "${nombreComercial}"?`)) {
+            const token = getAuthToken();
+            if (!token) {
+                alert('No autorizado. Por favor, inicie sesión.');
+                window.location.href = 'login.html';
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/${idInmobiliaria}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (response.status === 401) {
+                    alert('Sesión expirada o no autorizado. Por favor, inicie sesión nuevamente.');
+                    window.location.href = 'login.html';
+                    return;
+                }
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                alert('Inmobiliaria eliminada exitosamente.');
+                fetchAllInmobiliarias(); // Refresh the list
+            } catch (error) {
+                console.error('Error deleting inmobiliaria:', error);
+                alert('Error al eliminar la inmobiliaria.');
+            }
+        }
+    };
 });

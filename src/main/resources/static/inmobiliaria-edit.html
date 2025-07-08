@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editar Inmobiliaria</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div id="header-container"></div>
+    <div id="menu-container"></div>
+
+    <div class="page-container">
+        <main class="container">
+        <h1>Editar Inmobiliaria</h1>
+
+        <form id="inmobiliariaEditForm">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="nombreComercial">Nombre Comercial:</label>
+                    <input type="text" id="nombreComercial" required placeholder="Ej: Inmobiliaria Los Pinos">
+                </div>
+
+                <div class="form-group">
+                    <label for="razonSocial">Razón Social:</label>
+                    <input type="text" id="razonSocial" required placeholder="Ej: Inmobiliaria Los Pinos S.A. de C.V.">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="rfcNit">RFC/NIT:</label>
+                    <input type="text" id="rfcNit" required placeholder="Ej: ILP123456789">
+                </div>
+
+                <div class="form-group">
+                    <label for="telefonoPrincipal">Teléfono Principal:</label>
+                    <input type="text" id="telefonoPrincipal" placeholder="Ej: 555-123-4567">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="emailContacto">Email de Contacto:</label>
+                <input type="email" id="emailContacto" placeholder="Ej: contacto@inmobiliaria.com">
+            </div>
+
+            <div class="form-group">
+                <label for="direccionCompleta">Dirección Completa:</label>
+                <input type="text" id="direccionCompleta" placeholder="Ej: Av. Insurgentes Sur 123, Col. Roma">
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="ciudad">Ciudad:</label>
+                    <input type="text" id="ciudad" placeholder="Ej: Ciudad de México">
+                </div>
+
+                <div class="form-group">
+                    <label for="estado">Estado:</label>
+                    <input type="text" id="estado" placeholder="Ej: CDMX">
+                </div>
+
+                <div class="form-group">
+                    <label for="codigoPostal">Código Postal:</label>
+                    <input type="text" id="codigoPostal" placeholder="Ej: 06700">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="personaContacto">Persona de Contacto:</label>
+                    <input type="text" id="personaContacto" placeholder="Ej: María González">
+                </div>
+
+                <div class="form-group">
+                    <label for="estatus">Estatus:</label>
+                    <select id="estatus">
+                        <option value="ACTIVE">ACTIVO</option>
+                        <option value="INACTIVE">INACTIVO</option>
+                        <option value="SUSPENDED">SUSPENDIDO</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit">Actualizar Inmobiliaria</button>
+                <button type="button" onclick="window.location.href='inmobiliaria.html'">Cancelar</button>
+            </div>
+        </form>
+        </main>
+    </div>
+
+    <script src="js/auth.js"></script>
+    <script src="js/app.js"></script>
+    <script src="js/header.js"></script>
+    <script src="js/menu.js"></script>
+    <script src="js/inmobiliaria-edit.js"></script>
+</body>
+</html>
