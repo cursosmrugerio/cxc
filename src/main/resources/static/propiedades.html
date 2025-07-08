@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Propiedades</title>
+    <link href="css/style.css" rel="stylesheet">
+</head>
+<body>
+    <div id="header-container"></div>
+    <div id="menu-container"></div>
+
+    <div class="page-container">
+        <main class="container">
+        <h1>Listado de Propiedades</h1>
+        <button id="addPropiedadButton" class="add-button">Agregar Propiedad</button>
+
+        <section class="propiedad-list">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Tipo</th>
+                        <th>Dirección</th>
+                        <th>Superficie Total</th>
+                        <th>Superficie Construida</th>
+                        <th>Habitaciones</th>
+                        <th>Baños</th>
+                        <th>Estatus</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="propiedadTableBody">
+                    <!-- Propiedad rows will be loaded here -->
+                </tbody>
+            </table>
+        </section>
+        </main>
+    </div>
+
+    <script src="js/app.js"></script>
+    <script src="js/header.js"></script>
+    <script src="js/menu.js"></script>
+    <script src="js/propiedades.js"></script>
+</body>
+</html>
