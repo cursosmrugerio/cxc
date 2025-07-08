@@ -223,35 +223,156 @@
 }
 
 /* Form styles */
-#inmobiliaria-form {
-    background-color: #f9f9f9;
-    padding: 20px;
+#inmobiliariaAddForm {
+    background: white;
+    padding: 2.5rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    margin-top: 2rem;
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+    position: relative;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: #2c3e50;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.form-group input[type="text"],
+.form-group input[type="email"],
+.form-group select {
+    width: 100%;
+    padding: 0.8rem 1rem;
+    border: 2px solid #e9ecef;
     border-radius: 8px;
-    margin-bottom: 20px;
-    border: 1px solid #e0e0e0;
-}
-
-#inmobiliaria-form input[type="text"] {
-    width: calc(50% - 22px);
-    padding: 10px;
-    margin-right: 10px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
     font-size: 1rem;
+    transition: all 0.3s ease;
+    background-color: #f8f9fa;
+    box-sizing: border-box;
 }
 
-#inmobiliaria-form button {
-    padding: 10px 20px;
+.form-group input[type="text"]:focus,
+.form-group input[type="email"]:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: #007bff;
+    background-color: white;
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+    transform: translateY(-2px);
+}
+
+.form-group input[type="text"]:hover,
+.form-group input[type="email"]:hover,
+.form-group select:hover {
+    border-color: #007bff;
+    background-color: white;
+}
+
+.form-group input::placeholder {
+    color: #6c757d;
+    font-style: italic;
+    opacity: 0.8;
+}
+
+/* Form layout for larger screens */
+@media (min-width: 768px) {
+    .form-row {
+        display: flex;
+        gap: 1rem;
+    }
+    
+    .form-row .form-group {
+        flex: 1;
+    }
+}
+
+/* Form actions */
+.form-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-top: 2rem;
+    padding-top: 2rem;
+    border-top: 2px solid #e9ecef;
+}
+
+/* Form buttons */
+#inmobiliariaAddForm button {
+    padding: 0.8rem 2rem;
     border: none;
-    border-radius: 4px;
-    color: white;
-    background-color: #007bff;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
     cursor: pointer;
-    transition: background-color 0.2s;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    min-width: 150px;
 }
 
-#inmobiliaria-form button:hover {
-    background-color: #0056b3;
+#inmobiliariaAddForm button[type="submit"] {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    color: white;
+    box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+}
+
+#inmobiliariaAddForm button[type="submit"]:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
+}
+
+#inmobiliariaAddForm button[type="button"] {
+    background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
+    color: white;
+    box-shadow: 0 4px 15px rgba(108, 117, 125, 0.3);
+}
+
+#inmobiliariaAddForm button[type="button"]:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(108, 117, 125, 0.4);
+}
+
+#inmobiliariaAddForm button:active {
+    transform: translateY(0);
+}
+
+/* Form validation styles */
+.form-group input:required:invalid {
+    border-color: #dc3545;
+}
+
+.form-group input:required:valid {
+    border-color: #28a745;
+}
+
+/* Loading state */
+#inmobiliariaAddForm.loading {
+    opacity: 0.7;
+    pointer-events: none;
+}
+
+#inmobiliariaAddForm.loading::after {
+    content: 'Guardando...';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(255, 255, 255, 0.9);
+    padding: 1rem 2rem;
+    border-radius: 8px;
+    font-weight: 600;
+    color: #007bff;
 }
 
 /* Inmobiliarias List Styles */
@@ -415,6 +536,27 @@
         padding: 0.3rem 0.6rem;
         font-size: 0.7rem;
         margin-right: 0.3rem;
+    }
+    
+    /* Form responsive adjustments */
+    #inmobiliariaAddForm {
+        padding: 1.5rem;
+        margin-top: 1rem;
+    }
+    
+    .form-row {
+        flex-direction: column;
+        gap: 0;
+    }
+    
+    .form-actions {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    #inmobiliariaAddForm button {
+        width: 100%;
+        margin-bottom: 0.5rem;
     }
 }
 
