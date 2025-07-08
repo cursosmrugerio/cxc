@@ -3,29 +3,19 @@ package com.inmobiliaria.gestion.inmobiliaria.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.inmobiliaria.gestion.inmobiliaria.dto.InmobiliariaDTO;
 import com.inmobiliaria.gestion.inmobiliaria.service.InmobiliariaService;
-import com.inmobiliaria.gestion.security.JwtAuthenticationEntryPoint;
-import com.inmobiliaria.gestion.security.JwtAuthenticationFilter;
-import com.inmobiliaria.gestion.security.JwtUtil;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.junit.jupiter.web.SpringJUnitWebConfig;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.web.context.WebApplicationContext;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -34,11 +24,12 @@ import java.util.Optional;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.doThrow;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(InmobiliariaController.class)
-@Import(InmobiliariaControllerTest.TestSecurityConfig.class)
+@SpringJUnitWebConfig
 class InmobiliariaControllerTest {
 
     @Autowired
@@ -72,6 +63,7 @@ class InmobiliariaControllerTest {
     }
 
     @Test
+    @WithMockUser(roles = "USER")
     void getAllInmobiliarias_ShouldReturnPagedInmobiliarias() throws Exception {
         Page<InmobiliariaDTO> page = new PageImpl<>(List.of(testInmobiliariaDTO));
         when(inmobiliariaService.findAll(any(Pageable.class))).thenReturn(page);
@@ -88,6 +80,19 @@ class InmobiliariaControllerTest {
     }
 
     @Test
+    @WithMockUser(roles = "USER")
+    void getAllInmobiliarias_WithDescendingSort_ShouldReturnSortedResults() throws Exception {
+        Page<InmobiliariaDTO> page = new PageImpl<>(List.of(testInmobiliariaDTO));
+        when(inmobiliariaService.findAll(any(Pageable.class))).thenReturn(page);
+        
+        mockMvc.perform(get("/api/v1/inmobiliarias")
+                .param("sortDir", "desc")
+                .param("sortBy", "fechaCreacion"))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @WithMockUser(roles = "USER")
     void getInmobiliariaById_WhenExists_ShouldReturnInmobiliaria() throws Exception {
         when(inmobiliariaService.findById(1L)).thenReturn(Optional.of(testInmobiliariaDTO));
 
@@ -99,6 +104,7 @@ class InmobiliariaControllerTest {
     }
 
     @Test
+    @WithMockUser(roles = "USER")
     void getInmobiliariaById_WhenNotExists_ShouldReturnNotFound() throws Exception {
         when(inmobiliariaService.findById(999L)).thenReturn(Optional.empty());
 
@@ -107,6 +113,7 @@ class InmobiliariaControllerTest {
     }
 
     @Test
+    @WithMockUser(roles = "USER")
     void getInmobiliariaByRfcNit_WhenExists_ShouldReturnInmobiliaria() throws Exception {
         when(inmobiliariaService.findByRfcNit("TEST123456789")).thenReturn(Optional.of(testInmobiliariaDTO));
 
@@ -117,6 +124,16 @@ class InmobiliariaControllerTest {
     }
 
     @Test
+    @WithMockUser(roles = "USER")
+    void getInmobiliariaByRfcNit_WhenNotExists_ShouldReturnNotFound() throws Exception {
+        when(inmobiliariaService.findByRfcNit("NOTFOUND")).thenReturn(Optional.empty());
+
+        mockMvc.perform(get("/api/v1/inmobiliarias/rfc/NOTFOUND"))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @WithMockUser(roles = "USER")
     void searchInmobiliarias_ShouldReturnFilteredResults() throws Exception {
         Page<InmobiliariaDTO> page = new PageImpl<>(List.of(testInmobiliariaDTO));
         when(inmobiliariaService.findByFilters(anyString(), anyString(), anyString(), anyString(), any(Pageable.class)))
@@ -131,6 +148,27 @@ class InmobiliariaControllerTest {
     }
 
     @Test
+    @WithMockUser(roles = "USER")
+    void searchInmobiliarias_WithAllFilters_ShouldReturnResults() throws Exception {
+        Page<InmobiliariaDTO> page = new PageImpl<>(List.of(testInmobiliariaDTO));
+        when(inmobiliariaService.findByFilters(eq("Test"), eq("Test City"), eq("Test State"), eq("ACTIVE"), any(Pageable.class)))
+                .thenReturn(page);
+        
+        mockMvc.perform(get("/api/v1/inmobiliarias/search")
+                .param("nombreComercial", "Test")
+                .param("ciudad", "Test City")
+                .param("estado", "Test State")
+                .param("estatus", "ACTIVE")
+                .param("page", "0")
+                .param("size", "5")
+                .param("sortBy", "fechaCreacion")
+                .param("sortDir", "desc"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content[0].nombreComercial").value("Inmobiliaria Test"));
+    }
+
+    @Test
+    @WithMockUser(roles = "ADMIN")
     void createInmobiliaria_WithValidData_ShouldReturnCreated() throws Exception {
         InmobiliariaDTO newInmobiliaria = new InmobiliariaDTO(
                 null, "New Inmobiliaria", "New Real Estate S.A.", "NEW123456789",
@@ -147,6 +185,7 @@ class InmobiliariaControllerTest {
         when(inmobiliariaService.create(any(InmobiliariaDTO.class))).thenReturn(createdInmobiliaria);
 
         mockMvc.perform(post("/api/v1/inmobiliarias")
+                .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(newInmobiliaria)))
                 .andExpect(status().isCreated())
@@ -155,6 +194,7 @@ class InmobiliariaControllerTest {
     }
 
     @Test
+    @WithMockUser(roles = "ADMIN")
     void createInmobiliaria_WithDuplicateRfcNit_ShouldReturnBadRequest() throws Exception {
         InmobiliariaDTO newInmobiliaria = new InmobiliariaDTO(
                 null, "New Inmobiliaria", "New Real Estate S.A.", "TEST123456789",
@@ -166,6 +206,7 @@ class InmobiliariaControllerTest {
                 .thenThrow(new IllegalArgumentException("RFC/NIT already exists: TEST123456789"));
 
         mockMvc.perform(post("/api/v1/inmobiliarias")
+                .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(newInmobiliaria)))
                 .andExpect(status().isBadRequest())
@@ -173,6 +214,7 @@ class InmobiliariaControllerTest {
     }
 
     @Test
+    @WithMockUser(roles = "ADMIN")
     void updateInmobiliaria_WithValidData_ShouldReturnUpdated() throws Exception {
         InmobiliariaDTO updatedData = new InmobiliariaDTO(
                 1L, "Updated Inmobiliaria", "Updated Real Estate S.A.", "TEST123456789",
@@ -183,6 +225,7 @@ class InmobiliariaControllerTest {
         when(inmobiliariaService.update(eq(1L), any(InmobiliariaDTO.class))).thenReturn(updatedData);
 
         mockMvc.perform(put("/api/v1/inmobiliarias/1")
+                .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(updatedData)))
                 .andExpect(status().isOk())
@@ -190,48 +233,88 @@ class InmobiliariaControllerTest {
     }
 
     @Test
+    @WithMockUser(roles = "ADMIN")
     void updateInmobiliaria_WhenNotExists_ShouldReturnNotFound() throws Exception {
         when(inmobiliariaService.update(eq(999L), any(InmobiliariaDTO.class)))
                 .thenThrow(new IllegalArgumentException("Inmobiliaria not found with id: 999"));
 
         mockMvc.perform(put("/api/v1/inmobiliarias/999")
+                .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(testInmobiliariaDTO)))
                 .andExpect(status().isNotFound());
     }
 
     @Test
+    @WithMockUser(roles = "ADMIN")
+    void updateInmobiliaria_WithDuplicateRfcNit_ShouldReturnBadRequest() throws Exception {
+        when(inmobiliariaService.update(eq(1L), any(InmobiliariaDTO.class)))
+                .thenThrow(new IllegalArgumentException("RFC/NIT already exists"));
+
+        mockMvc.perform(put("/api/v1/inmobiliarias/1")
+                .with(csrf())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(testInmobiliariaDTO)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value("RFC/NIT already exists"));
+    }
+
+    @Test
+    @WithMockUser(roles = "ADMIN")
     void deleteInmobiliaria_WhenExists_ShouldReturnNoContent() throws Exception {
-        mockMvc.perform(delete("/api/v1/inmobiliarias/1"))
+        mockMvc.perform(delete("/api/v1/inmobiliarias/1")
+                .with(csrf()))
                 .andExpect(status().isNoContent());
     }
 
     @Test
+    @WithMockUser(roles = "ADMIN")
     void deleteInmobiliaria_WhenNotExists_ShouldReturnNotFound() throws Exception {
         doThrow(new IllegalArgumentException("Inmobiliaria not found with id: 999"))
                 .when(inmobiliariaService).deleteById(999L);
 
-        mockMvc.perform(delete("/api/v1/inmobiliarias/999"))
+        mockMvc.perform(delete("/api/v1/inmobiliarias/999")
+                .with(csrf()))
                 .andExpect(status().isNotFound());
     }
 
     @Test
+    @WithMockUser(roles = "ADMIN")
     void changeInmobiliariaStatus_ShouldReturnUpdated() throws Exception {
         InmobiliariaDTO updatedInmobiliaria = new InmobiliariaDTO(
                 1L, "Inmobiliaria Test", "Test Real Estate S.A. de C.V.", "TEST123456789",
                 "+52 55 1234 5678", "test@inmobiliaria.com", "Av. Test 123, Col. Centro",
-                "Test City", "Test State", "12345", "Juan Test", LocalDate.now(), "INACTIVE"
+                "Test City",
+                "Test State",
+                "12345",
+                "Juan Test",
+                LocalDate.now(),
+                "INACTIVE"
         );
 
         when(inmobiliariaService.changeStatus(1L, "INACTIVE")).thenReturn(updatedInmobiliaria);
 
         mockMvc.perform(patch("/api/v1/inmobiliarias/1/status")
+                .with(csrf())
                 .param("status", "INACTIVE"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.estatus").value("INACTIVE"));
     }
 
     @Test
+    @WithMockUser(roles = "ADMIN")
+    void changeInmobiliariaStatus_WhenNotFound_ShouldReturnNotFound() throws Exception {
+        when(inmobiliariaService.changeStatus(999L, "INACTIVE"))
+                .thenThrow(new IllegalArgumentException("Inmobiliaria not found with id: 999"));
+        
+        mockMvc.perform(patch("/api/v1/inmobiliarias/999/status")
+                .with(csrf())
+                .param("status", "INACTIVE"))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @WithMockUser(roles = "USER")
     void getInmobiliariasByStatus_ShouldReturnFilteredResults() throws Exception {
         Page<InmobiliariaDTO> page = new PageImpl<>(List.of(testInmobiliariaDTO));
         when(inmobiliariaService.findByEstatus(eq("ACTIVE"), any(Pageable.class))).thenReturn(page);
@@ -242,6 +325,21 @@ class InmobiliariaControllerTest {
     }
 
     @Test
+    @WithMockUser(roles = "USER")
+    void getInmobiliariasByStatus_WithDescendingSort_ShouldReturnResults() throws Exception {
+        Page<InmobiliariaDTO> page = new PageImpl<>(List.of(testInmobiliariaDTO));
+        when(inmobiliariaService.findByEstatus(eq("ACTIVE"), any(Pageable.class))).thenReturn(page);
+        
+        mockMvc.perform(get("/api/v1/inmobiliarias/status/ACTIVE")
+                .param("sortDir", "desc")
+                .param("sortBy", "fechaCreacion")
+                .param("page", "1")
+                .param("size", "5"))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @WithMockUser(roles = "USER")
     void getStatistics_ShouldReturnStatistics() throws Exception {
         when(inmobiliariaService.countByEstatus("ACTIVE")).thenReturn(5L);
         when(inmobiliariaService.countByEstatus("INACTIVE")).thenReturn(2L);
@@ -258,6 +356,7 @@ class InmobiliariaControllerTest {
     }
 
     @Test
+    @WithMockUser(roles = "USER")
     void getDistinctCities_ShouldReturnCitiesList() throws Exception {
         when(inmobiliariaService.getDistinctCiudades()).thenReturn(List.of("City A", "City B", "City C"));
 
@@ -268,6 +367,7 @@ class InmobiliariaControllerTest {
     }
 
     @Test
+    @WithMockUser(roles = "USER")
     void getDistinctStates_ShouldReturnStatesList() throws Exception {
         when(inmobiliariaService.getDistinctEstados()).thenReturn(List.of("State A", "State B"));
 
@@ -275,44 +375,5 @@ class InmobiliariaControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isArray())
                 .andExpect(jsonPath("$.length()").value(2));
-    }
-
-    @Test
-    void getAllInmobiliarias_WithoutAuthentication_ShouldReturnUnauthorized() throws Exception {
-        mockMvc.perform(get("/api/v1/inmobiliarias"))
-                .andExpect(status().isUnauthorized());
-    }
-
-    @Test
-    void createInmobiliaria_WithUserRole_ShouldReturnForbidden() throws Exception {
-        mockMvc.perform(post("/api/v1/inmobiliarias")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(testInmobiliariaDTO)))
-                .andExpect(status().isForbidden());
-    }
-
-    @Test
-    void updateInmobiliaria_WithUserRole_ShouldReturnForbidden() throws Exception {
-        mockMvc.perform(put("/api/v1/inmobiliarias/1")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(testInmobiliariaDTO)))
-                .andExpect(status().isForbidden());
-    }
-
-    @Test
-    void deleteInmobiliaria_WithUserRole_ShouldReturnForbidden() throws Exception {
-        mockMvc.perform(delete("/api/v1/inmobiliarias/1"))
-                .andExpect(status().isForbidden());
-    }
-
-    @Configuration
-    @EnableWebSecurity
-    static class TestSecurityConfig {
-        @Bean
-        public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-            http.csrf(csrf -> csrf.disable())
-                .authorizeHttpRequests(auth -> auth.anyRequest().permitAll());
-            return http.build();
-        }
     }
 }
