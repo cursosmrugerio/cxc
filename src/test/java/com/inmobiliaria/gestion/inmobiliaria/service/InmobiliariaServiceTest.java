@@ -265,9 +265,9 @@ class InmobiliariaServiceTest {
     class UpdateOperations {
 
         @Test
-        @DisplayName("Should update existing inmobiliaria successfully")
+        @DisplayName("Should update existing inmobiliaria successfully without RFC change")
         void shouldUpdateExistingInmobiliaria() {
-            // Given
+            // Given - Update with same RFC (no RFC change check needed)
             InmobiliariaDTO updateDTO = new InmobiliariaDTO(
                     1L, "Updated Name", "Updated Legal", "ILP123456789", "555-999-9999",
                     "updated@test.com", "Updated Address", "Updated City", "Updated State",
@@ -275,7 +275,6 @@ class InmobiliariaServiceTest {
             );
 
             when(inmobiliariaRepository.findById(1L)).thenReturn(Optional.of(testInmobiliaria));
-            when(inmobiliariaRepository.existsByRfcNitAndIdInmobiliariaNot("ILP123456789", 1L)).thenReturn(false);
             when(inmobiliariaRepository.save(any(Inmobiliaria.class))).thenReturn(testInmobiliaria);
 
             // When
@@ -284,7 +283,32 @@ class InmobiliariaServiceTest {
             // Then
             assertThat(result).isNotNull();
             verify(inmobiliariaRepository, times(1)).findById(1L);
-            verify(inmobiliariaRepository, times(1)).existsByRfcNitAndIdInmobiliariaNot("ILP123456789", 1L);
+            // Should NOT call existsByRfcNitAndIdInmobiliariaNot since RFC is not changing
+            verify(inmobiliariaRepository, never()).existsByRfcNitAndIdInmobiliariaNot(anyString(), anyLong());
+            verify(inmobiliariaRepository, times(1)).save(any(Inmobiliaria.class));
+        }
+
+        @Test
+        @DisplayName("Should check RFC uniqueness when RFC is being changed")
+        void shouldCheckRfcUniquenessWhenRfcIsChanging() {
+            // Given - Update with different RFC
+            InmobiliariaDTO updateDTO = new InmobiliariaDTO(
+                    1L, "Updated Name", "Updated Legal", "NEW123456789", "555-999-9999",
+                    "updated@test.com", "Updated Address", "Updated City", "Updated State",
+                    "99999", "Updated Contact", LocalDate.now(), "ACTIVE"
+            );
+
+            when(inmobiliariaRepository.findById(1L)).thenReturn(Optional.of(testInmobiliaria));
+            when(inmobiliariaRepository.existsByRfcNitAndIdInmobiliariaNot("NEW123456789", 1L)).thenReturn(false);
+            when(inmobiliariaRepository.save(any(Inmobiliaria.class))).thenReturn(testInmobiliaria);
+
+            // When
+            InmobiliariaDTO result = inmobiliariaService.update(1L, updateDTO);
+
+            // Then
+            assertThat(result).isNotNull();
+            verify(inmobiliariaRepository, times(1)).findById(1L);
+            verify(inmobiliariaRepository, times(1)).existsByRfcNitAndIdInmobiliariaNot("NEW123456789", 1L);
             verify(inmobiliariaRepository, times(1)).save(any(Inmobiliaria.class));
         }
 
@@ -305,16 +329,22 @@ class InmobiliariaServiceTest {
         @Test
         @DisplayName("Should throw exception when updating with existing RFC/NIT")
         void shouldThrowExceptionWhenUpdatingWithExistingRfcNit() {
-            // Given
+            // Given - Use a different RFC than the existing one to trigger uniqueness check
+            InmobiliariaDTO updateDTOWithDifferentRfc = new InmobiliariaDTO(
+                    1L, "Updated Name", "Updated Legal", "DIFFERENT123", "555-999-9999",
+                    "updated@test.com", "Updated Address", "Updated City", "Updated State",
+                    "99999", "Updated Contact", LocalDate.now(), "ACTIVE"
+            );
+            
             when(inmobiliariaRepository.findById(1L)).thenReturn(Optional.of(testInmobiliaria));
-            when(inmobiliariaRepository.existsByRfcNitAndIdInmobiliariaNot("ILP123456789", 1L)).thenReturn(true);
+            when(inmobiliariaRepository.existsByRfcNitAndIdInmobiliariaNot("DIFFERENT123", 1L)).thenReturn(true);
 
             // When & Then
-            assertThatThrownBy(() -> inmobiliariaService.update(1L, testInmobiliariaDTO))
+            assertThatThrownBy(() -> inmobiliariaService.update(1L, updateDTOWithDifferentRfc))
                     .isInstanceOf(RuntimeException.class)
-                    .hasMessageContaining("RFC/NIT already exists: ILP123456789");
+                    .hasMessageContaining("RFC/NIT already exists: DIFFERENT123");
             verify(inmobiliariaRepository, times(1)).findById(1L);
-            verify(inmobiliariaRepository, times(1)).existsByRfcNitAndIdInmobiliariaNot("ILP123456789", 1L);
+            verify(inmobiliariaRepository, times(1)).existsByRfcNitAndIdInmobiliariaNot("DIFFERENT123", 1L);
             verify(inmobiliariaRepository, never()).save(any(Inmobiliaria.class));
         }
     }
@@ -489,7 +519,7 @@ class InmobiliariaServiceTest {
             Page<Inmobiliaria> page = new PageImpl<>(Arrays.asList(testInmobiliaria));
             
             when(inmobiliariaRepository.findByFilters(
-                    anyString(), anyString(), anyString(), anyString(), any(Pageable.class)))
+                    "Los Pinos", "Ciudad de México", "CDMX", "ACTIVE", pageable))
                     .thenReturn(page);
 
             // When
@@ -500,7 +530,7 @@ class InmobiliariaServiceTest {
             assertThat(result.getContent()).hasSize(1);
             assertThat(result.getContent().get(0).nombreComercial()).isEqualTo("Inmobiliaria Los Pinos");
             verify(inmobiliariaRepository, times(1)).findByFilters(
-                    anyString(), anyString(), anyString(), anyString(), any(Pageable.class));
+                    "Los Pinos", "Ciudad de México", "CDMX", "ACTIVE", pageable);
         }
 
         @Test
@@ -511,7 +541,7 @@ class InmobiliariaServiceTest {
             Page<Inmobiliaria> emptyPage = new PageImpl<>(Arrays.asList());
             
             when(inmobiliariaRepository.findByFilters(
-                    anyString(), anyString(), anyString(), anyString(), any(Pageable.class)))
+                    "NotFound", null, null, null, pageable))
                     .thenReturn(emptyPage);
 
             // When
@@ -521,6 +551,8 @@ class InmobiliariaServiceTest {
             // Then
             assertThat(result.getContent()).isEmpty();
             assertThat(result.getTotalElements()).isZero();
+            verify(inmobiliariaRepository, times(1)).findByFilters(
+                    "NotFound", null, null, null, pageable);
         }
     }
 }
