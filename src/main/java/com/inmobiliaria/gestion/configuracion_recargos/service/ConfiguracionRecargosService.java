@@ -54,22 +54,79 @@ public class ConfiguracionRecargosService {
         return false;
     }
 
+    @Transactional(readOnly = true)
+    public List<ConfiguracionRecargosDTO> findByInmobiliaria(Long idInmobiliaria) {
+        return configuracionRecargosRepository.findByIdInmobiliaria(idInmobiliaria).stream()
+                .map(this::toDto)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public List<ConfiguracionRecargosDTO> findActiveByInmobiliaria(Long idInmobiliaria) {
+        return configuracionRecargosRepository.findByIdInmobiliaria(idInmobiliaria).stream()
+                .filter(ConfiguracionRecargos::getActivo)
+                .map(this::toDto)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public List<ConfiguracionRecargosDTO> findByTipoRecargo(String tipoRecargo) {
+        return configuracionRecargosRepository.findByTipoRecargo(tipoRecargo).stream()
+                .map(this::toDto)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public Optional<ConfiguracionRecargosDTO> findByInmobiliariaAndTipoRecargo(Long idInmobiliaria, String tipoRecargo) {
+        return configuracionRecargosRepository.findByIdInmobiliariaAndTipoRecargo(idInmobiliaria, tipoRecargo)
+                .map(this::toDto);
+    }
+
+    @Transactional
+    public Optional<ConfiguracionRecargosDTO> toggleActive(Long id) {
+        return configuracionRecargosRepository.findById(id)
+                .map(entity -> {
+                    entity.setActivo(!entity.getActivo());
+                    return toDto(configuracionRecargosRepository.save(entity));
+                });
+    }
+
     private ConfiguracionRecargosDTO toDto(ConfiguracionRecargos entity) {
         return new ConfiguracionRecargosDTO(
                 entity.getIdConfiguracionRecargo(),
+                entity.getActiva(),
+                entity.getAplicaAConceptos(),
+                entity.getDiasCorteServicios(),
+                entity.getDiasGracia(),
+                entity.getMontoRecargoFijo(),
+                entity.getNombrePolitica(),
+                entity.getPorcentajeRecargoDiario(),
+                entity.getRecargoMaximo(),
                 entity.getTipoRecargo(),
-                entity.getMonto(),
-                entity.getDiaAplicacion(),
+                entity.getIdInmobiliaria(),
+                entity.getTasaRecargoDiaria(),
+                entity.getTasaRecargoFija(),
                 entity.getActivo(),
-                entity.getIdInmobiliaria()
+                entity.getDiaAplicacion(),
+                entity.getMonto()
         );
     }
 
     private void updateEntityFromDto(ConfiguracionRecargos entity, ConfiguracionRecargosDTO dto) {
+        entity.setActiva(dto.activa());
+        entity.setAplicaAConceptos(dto.aplicaAConceptos());
+        entity.setDiasCorteServicios(dto.diasCorteServicios());
+        entity.setDiasGracia(dto.diasGracia());
+        entity.setMontoRecargoFijo(dto.montoRecargoFijo());
+        entity.setNombrePolitica(dto.nombrePolitica());
+        entity.setPorcentajeRecargoDiario(dto.porcentajeRecargoDiario());
+        entity.setRecargoMaximo(dto.recargoMaximo());
         entity.setTipoRecargo(dto.tipoRecargo());
-        entity.setMonto(dto.monto());
-        entity.setDiaAplicacion(dto.diaAplicacion());
-        entity.setActivo(dto.activo());
         entity.setIdInmobiliaria(dto.idInmobiliaria());
+        entity.setTasaRecargoDiaria(dto.tasaRecargoDiaria());
+        entity.setTasaRecargoFija(dto.tasaRecargoFija());
+        entity.setActivo(dto.activo());
+        entity.setDiaAplicacion(dto.diaAplicacion());
+        entity.setMonto(dto.monto());
     }
 }
