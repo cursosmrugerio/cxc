@@ -14,15 +14,21 @@ public class ConfiguracionRecargos {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_configuracion", nullable = false)
-    private Long id;
+    private Long idConfiguracionRecargo;
 
-    @Column(name = "dias_gracia")
-    private Integer diasGracia;
+    @Column(name = "tipo_recargo", nullable = false)
+    private String tipoRecargo;
 
-    @Column(name = "tasa_recargo_diaria", precision = 5, scale = 2)
-    private BigDecimal tasaRecargoDiaria;
+    @Column(name = "monto", precision = 10, scale = 2, nullable = false)
+    private BigDecimal monto;
 
-    @Column(name = "tasa_recargo_fija", precision = 10, scale = 2)
-    private BigDecimal tasaRecargoFija;
+    @Column(name = "dia_aplicacion", nullable = false)
+    private Integer diaAplicacion;
+
+    @Column(name = "activo", nullable = false)
+    private Boolean activo;
+
+    @Column(name = "id_inmobiliaria", nullable = false)
+    private Long idInmobiliaria;
 
 }

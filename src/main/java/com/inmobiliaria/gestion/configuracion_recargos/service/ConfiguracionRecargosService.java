@@ -56,16 +56,20 @@ public class ConfiguracionRecargosService {
 
     private ConfiguracionRecargosDTO toDto(ConfiguracionRecargos entity) {
         return new ConfiguracionRecargosDTO(
-                entity.getId(),
-                entity.getDiasGracia(),
-                entity.getTasaRecargoDiaria(),
-                entity.getTasaRecargoFija()
+                entity.getIdConfiguracionRecargo(),
+                entity.getTipoRecargo(),
+                entity.getMonto(),
+                entity.getDiaAplicacion(),
+                entity.getActivo(),
+                entity.getIdInmobiliaria()
         );
     }
 
     private void updateEntityFromDto(ConfiguracionRecargos entity, ConfiguracionRecargosDTO dto) {
-        entity.setDiasGracia(dto.diasGracia());
-        entity.setTasaRecargoDiaria(dto.tasaRecargoDiaria());
-        entity.setTasaRecargoFija(dto.tasaRecargoFija());
+        entity.setTipoRecargo(dto.tipoRecargo());
+        entity.setMonto(dto.monto());
+        entity.setDiaAplicacion(dto.diaAplicacion());
+        entity.setActivo(dto.activo());
+        entity.setIdInmobiliaria(dto.idInmobiliaria());
     }
 }
