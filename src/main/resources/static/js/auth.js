@@ -124,6 +124,27 @@ class AuthManager {
             throw error;
         }
     }
+
+    hasRole(role) {
+        const userData = this.getUserData();
+        if (!userData || !userData.roles) {
+            return false;
+        }
+        
+        // Check if user has the specified role
+        return userData.roles.some(userRole => 
+            userRole.toLowerCase() === role.toLowerCase() || 
+            userRole.toLowerCase() === `role_${role.toLowerCase()}`
+        );
+    }
+
+    isAdmin() {
+        return this.hasRole('admin');
+    }
+
+    isUser() {
+        return this.hasRole('user');
+    }
 }
 
 const authManager = new AuthManager();

@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ver Concepto de Pago</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div id="header-container"></div>
+    <div id="menu-container"></div>
+
+    <div class="page-container">
+        <main class="container">
+        <h1>Ver Concepto de Pago</h1>
+
+        <div class="form-container">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="nombreConcepto">Nombre del Concepto:</label>
+                    <input type="text" id="nombreConcepto" readonly>
+                </div>
+
+                <div class="form-group">
+                    <label for="tipoConcepto">Tipo de Concepto:</label>
+                    <input type="text" id="tipoConcepto" readonly>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="descripcion">Descripción:</label>
+                <input type="text" id="descripcion" readonly>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="permiteRecargos">¿Permite Recargos?:</label>
+                    <input type="text" id="permiteRecargos" readonly>
+                </div>
+
+                <div class="form-group">
+                    <label for="activo">Estatus:</label>
+                    <input type="text" id="activo" readonly>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="idInmobiliaria">Inmobiliaria:</label>
+                <input type="text" id="idInmobiliaria" readonly>
+            </div>
+
+            <div class="form-actions">
+                <button type="button" onclick="window.location.href='conceptosPago.html'">Volver</button>
+            </div>
+        </div>
+        </main>
+    </div>
+
+    <script src="js/auth.js"></script>
+    <script src="js/app.js"></script>
+    <script src="js/header.js"></script>
+    <script src="js/menu.js"></script>
+    <script src="js/concepto-pago-view.js"></script>
+</body>
+</html>

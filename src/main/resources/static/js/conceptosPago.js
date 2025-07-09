@@ -108,95 +108,31 @@ document.addEventListener('DOMContentLoaded', () => {
             
             // Actions column
             const actionsCell = row.insertCell();
-            actionsCell.innerHTML = `
-                <button class="edit-button" onclick="editConceptoPago(${concepto.idConcepto})">
-                    Editar
-                </button>
-                <button class="delete-button" onclick="deleteConceptoPago(${concepto.idConcepto}, '${(concepto.nombreConcepto || 'Concepto').replace(/'/g, "\\'")}')">
-                    Eliminar
-                </button>
-            `;
+            
+            // Check if user is admin to show edit/delete buttons
+            const isAdmin = authManager && authManager.isAdmin();
+            
+            let actionsHTML = '';
+            if (isAdmin) {
+                actionsHTML = `
+                    <button class="edit-button" onclick="editConceptoPago(${concepto.idConcepto})">
+                        Editar
+                    </button>
+                    <button class="delete-button" onclick="deleteConceptoPago(${concepto.idConcepto}, '${(concepto.nombreConcepto || 'Concepto').replace(/'/g, "\\'")}')">
+                        Eliminar
+                    </button>
+                `;
+            } else {
+                actionsHTML = `
+                    <button class="view-button" onclick="viewConceptoPago(${concepto.idConcepto})">
+                        Ver
+                    </button>
+                `;
+            }
+            
+            actionsCell.innerHTML = actionsHTML;
             actionsCell.setAttribute('data-label', 'Acciones');
         });
-    };
-
-    // Initial fetch for the list page
-    if (conceptoPagoTableBody) {
-        fetchAllConceptosPagoEnhanced();
-    }
-
-    // Event listener for the Add ConceptoPago button
-    if (addConceptoPagoButton) {
-        addConceptoPagoButton.addEventListener('click', () => {
-            window.location.href = 'concepto-pago-add.html';
-        });
-    }
-
-    // Function to edit a concepto de pago
-    window.editConceptoPago = (idConcepto) => {
-        window.location.href = `concepto-pago-edit.html?id=${idConcepto}`;
-    };
-
-    // Function to delete a concepto de pago
-    window.deleteConceptoPago = async (idConcepto, nombreConcepto) => {
-        if (confirm(`¿Está seguro que desea eliminar el concepto de pago "${nombreConcepto}"?`)) {
-            const token = getAuthToken();
-            if (!token) {
-                alert('No autorizado. Por favor, inicie sesión.');
-                window.location.href = 'login.html';
-                return;
-            }
-
-            try {
-                const response = await fetch(`${API_BASE_URL}/${idConcepto}`, {
-                    method: 'DELETE',
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
-                });
-
-                if (response.status === 401) {
-                    alert('Sesión expirada o no autorizado. Por favor, inicie sesión nuevamente.');
-                    window.location.href = 'login.html';
-                    return;
-                }
-
-                if (response.status === 404) {
-                    alert('Concepto de pago no encontrado.');
-                    return;
-                }
-
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-
-                alert('Concepto de pago eliminado exitosamente.');
-                fetchAllConceptosPagoEnhanced(); // Refresh the list
-            } catch (error) {
-                console.error('Error deleting concepto de pago:', error);
-                alert('Error al eliminar el concepto de pago.');
-            }
-        }
-    };
-
-    // Function to get status badge HTML
-    const getStatusBadge = (activo) => {
-        if (activo === null || activo === undefined) return '<span class="badge badge-secondary">N/A</span>';
-        
-        const badgeClass = activo ? 'badge-success' : 'badge-danger';
-        const status = activo ? 'ACTIVO' : 'INACTIVO';
-        
-        return `<span class="badge ${badgeClass}">${status}</span>`;
-    };
-
-    // Function to get permite recargos badge HTML
-    const getPermiteRecargosBadge = (permiteRecargos) => {
-        if (permiteRecargos === null || permiteRecargos === undefined) return '<span class="badge badge-secondary">N/A</span>';
-        
-        const badgeClass = permiteRecargos ? 'badge-success' : 'badge-danger';
-        const status = permiteRecargos ? 'SÍ' : 'NO';
-        
-        return `<span class="badge ${badgeClass}">${status}</span>`;
     };
 
     // Store all conceptos de pago for filtering
@@ -268,6 +204,95 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error('Error fetching conceptos de pago:', error);
             alert('Error al cargar los conceptos de pago.');
         }
+    };
+
+    // Initial fetch for the list page
+    if (conceptoPagoTableBody) {
+        fetchAllConceptosPagoEnhanced();
+    }
+
+    // Event listener for the Add ConceptoPago button
+    if (addConceptoPagoButton) {
+        // Hide add button for non-admin users
+        if (!authManager.isAdmin()) {
+            addConceptoPagoButton.style.display = 'none';
+        } else {
+            addConceptoPagoButton.addEventListener('click', () => {
+                window.location.href = 'concepto-pago-add.html';
+            });
+        }
+    }
+
+    // Function to edit a concepto de pago
+    window.editConceptoPago = (idConcepto) => {
+        window.location.href = `concepto-pago-edit.html?id=${idConcepto}`;
+    };
+
+    // Function to view a concepto de pago (for non-admin users)
+    window.viewConceptoPago = (idConcepto) => {
+        window.location.href = `concepto-pago-view.html?id=${idConcepto}`;
+    };
+
+    // Function to delete a concepto de pago
+    window.deleteConceptoPago = async (idConcepto, nombreConcepto) => {
+        if (confirm(`¿Está seguro que desea eliminar el concepto de pago "${nombreConcepto}"?`)) {
+            const token = getAuthToken();
+            if (!token) {
+                alert('No autorizado. Por favor, inicie sesión.');
+                window.location.href = 'login.html';
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/${idConcepto}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (response.status === 401) {
+                    alert('Sesión expirada o no autorizado. Por favor, inicie sesión nuevamente.');
+                    window.location.href = 'login.html';
+                    return;
+                }
+
+                if (response.status === 404) {
+                    alert('Concepto de pago no encontrado.');
+                    return;
+                }
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                alert('Concepto de pago eliminado exitosamente.');
+                fetchAllConceptosPagoEnhanced(); // Refresh the list
+            } catch (error) {
+                console.error('Error deleting concepto de pago:', error);
+                alert('Error al eliminar el concepto de pago.');
+            }
+        }
+    };
+
+    // Function to get status badge HTML
+    const getStatusBadge = (activo) => {
+        if (activo === null || activo === undefined) return '<span class="badge badge-secondary">N/A</span>';
+        
+        const badgeClass = activo ? 'badge-success' : 'badge-danger';
+        const status = activo ? 'ACTIVO' : 'INACTIVO';
+        
+        return `<span class="badge ${badgeClass}">${status}</span>`;
+    };
+
+    // Function to get permite recargos badge HTML
+    const getPermiteRecargosBadge = (permiteRecargos) => {
+        if (permiteRecargos === null || permiteRecargos === undefined) return '<span class="badge badge-secondary">N/A</span>';
+        
+        const badgeClass = permiteRecargos ? 'badge-success' : 'badge-danger';
+        const status = permiteRecargos ? 'SÍ' : 'NO';
+        
+        return `<span class="badge ${badgeClass}">${status}</span>`;
     };
 
     // Filter functionality
