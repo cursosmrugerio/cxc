@@ -682,6 +682,118 @@ body.menu-open {
     color: #007bff;
 }
 
+/* Form Section Styles */
+.form-section {
+    background: #f8f9fa;
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    border: 1px solid #e9ecef;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+}
+
+.form-section:hover {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+}
+
+.form-section h3 {
+    color: #2c3e50;
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin: 0 0 1.5rem 0;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid #007bff;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Enhanced form group styles for numbers */
+.form-group input[type="number"] {
+    width: 100%;
+    padding: 0.8rem 1rem;
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    background-color: #f8f9fa;
+    box-sizing: border-box;
+}
+
+.form-group input[type="number"]:focus {
+    outline: none;
+    border-color: #007bff;
+    background-color: white;
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+    transform: translateY(-2px);
+}
+
+.form-group input[type="number"]:hover {
+    border-color: #007bff;
+    background-color: white;
+}
+
+/* Help text styling */
+.help-text {
+    display: block;
+    margin-top: 0.4rem;
+    font-size: 0.8rem;
+    color: #6c757d;
+    font-style: italic;
+    line-height: 1.4;
+}
+
+/* Enhanced validation styles */
+.form-group input:required:invalid {
+    border-color: #dc3545;
+    background-color: rgba(220, 53, 69, 0.05);
+}
+
+.form-group input:required:valid {
+    border-color: #28a745;
+    background-color: rgba(40, 167, 69, 0.05);
+}
+
+/* ConfiguracionRecargos specific form styles */
+#configuracionRecargoAddForm.loading,
+#configuracionRecargoEditForm.loading {
+    opacity: 0.7;
+    pointer-events: none;
+}
+
+#configuracionRecargoAddForm.loading::after,
+#configuracionRecargoEditForm.loading::after {
+    content: 'Guardando configuración...';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(255, 255, 255, 0.95);
+    padding: 1rem 2rem;
+    border-radius: 8px;
+    font-weight: 600;
+    color: #007bff;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+/* Form responsiveness improvements */
+@media (max-width: 768px) {
+    .form-section {
+        padding: 1rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .form-section h3 {
+        font-size: 1rem;
+        margin-bottom: 1rem;
+    }
+    
+    .help-text {
+        font-size: 0.75rem;
+    }
+}
+
 /* Inmobiliarias List Styles */
 .inmobiliaria-list {
     margin-top: 2rem;

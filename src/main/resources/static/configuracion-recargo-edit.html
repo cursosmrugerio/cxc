@@ -15,30 +15,120 @@
         <h1>Editar Configuración de Recargo</h1>
 
         <form id="configuracionRecargoEditForm">
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="tipoRecargo">Tipo de Recargo:</label>
-                    <input type="text" id="tipoRecargo" required placeholder="Ej: Recargo por mora">
+            <input type="hidden" id="idConfiguracionRecargo">
+            <input type="hidden" id="idInmobiliaria">
+            
+            <!-- Información General -->
+            <div class="form-section">
+                <h3>Información General</h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="nombrePolitica">Nombre de la Política:</label>
+                        <input type="text" id="nombrePolitica" maxlength="100" placeholder="Ej: Política Estándar de Mora">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="tipoRecargo">Tipo de Recargo:</label>
+                        <input type="text" id="tipoRecargo" required maxlength="255" placeholder="Ej: mora, interes_compuesto, mantenimiento">
+                    </div>
                 </div>
 
                 <div class="form-group">
-                    <label for="monto">Monto:</label>
-                    <input type="number" id="monto" required placeholder="Ej: 100.00">
+                    <label for="aplicaAConceptos">Aplica a Conceptos:</label>
+                    <input type="text" id="aplicaAConceptos" maxlength="200" placeholder="Ej: renta,servicios,mantenimiento">
+                    <small class="help-text">Separar conceptos por comas</small>
                 </div>
             </div>
 
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="diaAplicacion">Día de Aplicación:</label>
-                    <input type="number" id="diaAplicacion" required placeholder="Ej: 15">
+            <!-- Configuración de Montos -->
+            <div class="form-section">
+                <h3>Configuración de Montos</h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="monto">Monto Base:</label>
+                        <input type="number" id="monto" step="0.01" required placeholder="Ej: 50.00">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="montoRecargoFijo">Monto Recargo Fijo:</label>
+                        <input type="number" id="montoRecargoFijo" step="0.01" min="0" placeholder="Ej: 100.00">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="recargoMaximo">Recargo Máximo:</label>
+                        <input type="number" id="recargoMaximo" step="0.01" min="0" placeholder="Ej: 1000.00">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="porcentajeRecargoDiario">Porcentaje Recargo Diario (%):</label>
+                        <input type="number" id="porcentajeRecargoDiario" step="0.01" min="0" max="100" placeholder="Ej: 1.5">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Configuración de Tasas -->
+            <div class="form-section">
+                <h3>Configuración de Tasas</h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="tasaRecargoDiaria">Tasa Recargo Diaria:</label>
+                        <input type="number" id="tasaRecargoDiaria" step="0.001" min="0" placeholder="Ej: 0.05">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="tasaRecargoFija">Tasa Recargo Fija:</label>
+                        <input type="number" id="tasaRecargoFija" step="0.001" min="0" placeholder="Ej: 0.10">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Configuración de Períodos -->
+            <div class="form-section">
+                <h3>Configuración de Períodos</h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="diaAplicacion">Día de Aplicación:</label>
+                        <input type="number" id="diaAplicacion" min="1" max="31" required placeholder="Ej: 5">
+                        <small class="help-text">Día del mes en que se aplica el recargo</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="diasGracia">Días de Gracia:</label>
+                        <input type="number" id="diasGracia" min="0" placeholder="Ej: 3">
+                        <small class="help-text">Días antes de aplicar el recargo</small>
+                    </div>
                 </div>
 
                 <div class="form-group">
-                    <label for="activo">Estatus:</label>
-                    <select id="activo" required>
-                        <option value="true">ACTIVO</option>
-                        <option value="false">INACTIVO</option>
-                    </select>
+                    <label for="diasCorteServicios">Días para Corte de Servicios:</label>
+                    <input type="number" id="diasCorteServicios" min="0" placeholder="Ej: 15">
+                    <small class="help-text">Días después del vencimiento para corte de servicios</small>
+                </div>
+            </div>
+
+            <!-- Estado de la Configuración -->
+            <div class="form-section">
+                <h3>Estado de la Configuración</h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="activo">Estado Activo:</label>
+                        <select id="activo" required>
+                            <option value="true">Activo</option>
+                            <option value="false">Inactivo</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="activa">Configuración Activa:</label>
+                        <select id="activa">
+                            <option value="">Seleccionar</option>
+                            <option value="true">Sí</option>
+                            <option value="false">No</option>
+                        </select>
+                        <small class="help-text">Indica si la configuración está activa</small>
+                    </div>
                 </div>
             </div>
 

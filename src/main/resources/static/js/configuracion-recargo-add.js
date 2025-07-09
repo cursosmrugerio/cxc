@@ -15,17 +15,32 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
+            // Get all form values
             const tipoRecargo = document.getElementById('tipoRecargo').value;
             const monto = document.getElementById('monto').value;
             const diaAplicacion = document.getElementById('diaAplicacion').value;
             const activo = document.getElementById('activo').value === 'true';
             const idInmobiliaria = document.getElementById('idInmobiliaria').value;
+            
+            // Get optional fields
+            const activa = document.getElementById('activa').value;
+            const aplicaAConceptos = document.getElementById('aplicaAConceptos').value;
+            const diasCorteServicios = document.getElementById('diasCorteServicios').value;
+            const diasGracia = document.getElementById('diasGracia').value;
+            const montoRecargoFijo = document.getElementById('montoRecargoFijo').value;
+            const nombrePolitica = document.getElementById('nombrePolitica').value;
+            const porcentajeRecargoDiario = document.getElementById('porcentajeRecargoDiario').value;
+            const recargoMaximo = document.getElementById('recargoMaximo').value;
+            const tasaRecargoDiaria = document.getElementById('tasaRecargoDiaria').value;
+            const tasaRecargoFija = document.getElementById('tasaRecargoFija').value;
 
+            // Validate required fields
             if (!tipoRecargo || !monto || !diaAplicacion || !idInmobiliaria) {
-                alert('Todos los campos son requeridos.');
+                alert('Los campos marcados como requeridos son obligatorios.');
                 return;
             }
 
+            // Build configuration data object
             const configuracionData = {
                 tipoRecargo: tipoRecargo,
                 monto: parseFloat(monto),
@@ -33,6 +48,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 activo: activo,
                 idInmobiliaria: parseInt(idInmobiliaria)
             };
+
+            // Add optional fields if they have values
+            if (activa !== '') configuracionData.activa = activa === 'true';
+            if (aplicaAConceptos) configuracionData.aplicaAConceptos = aplicaAConceptos;
+            if (diasCorteServicios) configuracionData.diasCorteServicios = parseInt(diasCorteServicios);
+            if (diasGracia) configuracionData.diasGracia = parseInt(diasGracia);
+            if (montoRecargoFijo) configuracionData.montoRecargoFijo = parseFloat(montoRecargoFijo);
+            if (nombrePolitica) configuracionData.nombrePolitica = nombrePolitica;
+            if (porcentajeRecargoDiario) configuracionData.porcentajeRecargoDiario = parseFloat(porcentajeRecargoDiario);
+            if (recargoMaximo) configuracionData.recargoMaximo = parseFloat(recargoMaximo);
+            if (tasaRecargoDiaria) configuracionData.tasaRecargoDiaria = parseFloat(tasaRecargoDiaria);
+            if (tasaRecargoFija) configuracionData.tasaRecargoFija = parseFloat(tasaRecargoFija);
 
             try {
                 const response = await fetch(API_BASE_URL, {
