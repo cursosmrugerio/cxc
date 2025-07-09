@@ -38,10 +38,11 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/v1/auth/**").permitAll()
                         .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/api-docs", "/api-docs/**", "/v3/api-docs/**").permitAll()
-                        .requestMatchers("/", "/index.html", "/login.html", "/register.html", "/inmobiliaria.html", "/inmobiliaria-add.html", "/inmobiliaria-edit.html", "/propiedades.html", "/propiedad-add.html", "/propiedad-edit.html", "/css/**", "/js/**", "/images/**", "/components/**", "/favicon.ico").permitAll()
+                        .requestMatchers("/", "/index.html", "/login.html", "/register.html", "/inmobiliaria.html", "/inmobiliaria-add.html", "/inmobiliaria-edit.html", "/propiedades.html", "/propiedad-add.html", "/propiedad-edit.html", "/conceptosPago.html", "/concepto-pago-add.html", "/css/**", "/js/**", "/images/**", "/components/**", "/favicon.ico").permitAll()
                         .requestMatchers("/error", "/.well-known/**").permitAll()
                         .requestMatchers("/api/v1/inmobiliarias/**").authenticated()
                         .requestMatchers("/api/v1/propiedades/**").authenticated()
+                        .requestMatchers("/api/v1/conceptos-pago/**").authenticated()
                         .anyRequest().authenticated()
                 );
 
