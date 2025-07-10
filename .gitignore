@@ -18,6 +18,7 @@ local.properties
 Servers/
 */*/*/target
 **/.DS_Store
+.mcp.json
 
 # Ignorar credenciales de Gemini
 .gemini/
