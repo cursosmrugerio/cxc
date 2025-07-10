@@ -1198,6 +1198,126 @@ body.menu-open {
     }
 }
 
+/* ================================
+   Contrato List Styles
+   ================================ */
+
+.contrato-list table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 0;
+}
+
+.contrato-list th {
+    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+    color: white;
+    padding: 1rem;
+    text-align: left;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-size: 0.875rem;
+    border: none;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.contrato-list td {
+    padding: 1rem;
+    border-bottom: 1px solid #e9ecef;
+    vertical-align: middle;
+    font-size: 0.9rem;
+}
+
+.contrato-list tbody tr {
+    transition: all 0.2s ease;
+}
+
+.contrato-list tbody tr:hover {
+    background-color: #f8f9fa;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.contrato-list tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* Actions column styling for contratos */
+.contrato-list td:last-child {
+    min-width: 180px;
+    white-space: nowrap;
+    padding: 1rem 1.5rem;
+}
+
+.contrato-list th:last-child {
+    text-align: center;
+    min-width: 180px;
+}
+
+/* Property info styling for contratos */
+.contrato-list .property-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.contrato-list .property-type {
+    font-weight: 600;
+    color: #007bff;
+    margin-bottom: 0.25rem;
+}
+
+.contrato-list .property-address {
+    font-size: 0.85rem;
+    color: #6c757d;
+}
+
+/* Mobile responsive for contrato list */
+@media (max-width: 768px) {
+    .contrato-list table,
+    .contrato-list thead,
+    .contrato-list tbody,
+    .contrato-list th,
+    .contrato-list td,
+    .contrato-list tr {
+        display: block;
+    }
+    
+    .contrato-list thead tr {
+        position: absolute;
+        top: -9999px;
+        left: -9999px;
+    }
+    
+    .contrato-list tr {
+        border: 1px solid #e9ecef;
+        border-radius: 8px;
+        margin-bottom: 1rem;
+        padding: 1rem;
+        background: white;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    
+    .contrato-list td {
+        border: none;
+        border-bottom: 1px solid #e9ecef;
+        position: relative;
+        padding-left: 50%;
+        padding-top: 0.5rem;
+        padding-bottom: 0.5rem;
+    }
+    
+    .contrato-list td:before {
+        content: attr(data-label) ": ";
+        position: absolute;
+        left: 6px;
+        width: 45%;
+        padding-right: 10px;
+        white-space: nowrap;
+        font-weight: 600;
+        color: #007bff;
+    }
+}
+
 /* Propiedad form styles */
 #propiedadAddForm textarea, #propiedadEditForm textarea {
     width: 100%;

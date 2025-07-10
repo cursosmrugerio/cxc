@@ -3,7 +3,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const PROPIEDADES_API_URL = 'http://localhost:8080/api/v1/propiedades';
     const contratoTableBody = document.getElementById('contratoTableBody');
     const addContratoButton = document.getElementById('addContratoButton');
-    const notificationsButton = document.getElementById('notificationsButton');
 
     // Function to get JWT token from localStorage
     const getAuthToken = () => localStorage.getItem('jwt_token');
@@ -11,6 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Store all contratos for filtering
     let allContratos = [];
     let propiedadMap = new Map();
+    let inmobiliariaMap = new Map();
 
     // Function to fetch propiedades and create mapping
     const fetchPropiedades = async () => {
@@ -31,12 +31,39 @@ document.addEventListener('DOMContentLoaded', () => {
                 propiedades.forEach(propiedad => {
                     propiedadMap.set(propiedad.idPropiedad, {
                         direccion: propiedad.direccionCompleta,
-                        tipo: propiedad.tipoPropiedad
+                        tipo: propiedad.tipoPropiedad,
+                        idInmobiliaria: propiedad.idInmobiliaria
                     });
                 });
             }
         } catch (error) {
             console.error('Error fetching propiedades:', error);
+        }
+    };
+
+    // Function to fetch inmobiliarias and create mapping
+    const fetchInmobiliarias = async () => {
+        const token = getAuthToken();
+        if (!token) return;
+
+        try {
+            const response = await fetch('http://localhost:8080/api/v1/inmobiliarias?page=0&size=10000', {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                const inmobiliarias = data.content || data;
+                
+                // Create mapping from id to inmobiliaria name
+                inmobiliarias.forEach(inmobiliaria => {
+                    inmobiliariaMap.set(inmobiliaria.idInmobiliaria, inmobiliaria.nombreComercial);
+                });
+            }
+        } catch (error) {
+            console.error('Error fetching inmobiliarias:', error);
         }
     };
 
@@ -50,8 +77,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         try {
-            // First fetch propiedades to create the mapping
+            // First fetch propiedades and inmobiliarias to create the mappings
             await fetchPropiedades();
+            await fetchInmobiliarias();
             
             const response = await fetch(`${API_BASE_URL}`, {
                 headers: {
@@ -86,19 +114,14 @@ document.addEventListener('DOMContentLoaded', () => {
         contratos.forEach(contrato => {
             const row = contratoTableBody.insertRow();
             
-            // ID
-            const idCell = row.insertCell();
-            idCell.textContent = contrato.idContrato;
-            idCell.setAttribute('data-label', 'ID');
-            
             // Propiedad
             const propiedadCell = row.insertCell();
             const propiedadInfo = propiedadMap.get(contrato.idPropiedad);
             if (propiedadInfo) {
                 propiedadCell.innerHTML = `
                     <div class="property-info">
-                        <div class="property-type">${propiedadInfo.tipo}</div>
-                        <div class="property-address">${propiedadInfo.direccion}</div>
+                        <div class="property-type">${propiedadInfo.tipo || 'N/A'}</div>
+                        <div class="property-address">${propiedadInfo.direccion || 'N/A'}</div>
                     </div>
                 `;
             } else {
@@ -123,37 +146,18 @@ document.addEventListener('DOMContentLoaded', () => {
             
             // Estatus
             const estatusCell = row.insertCell();
-            estatusCell.innerHTML = getStatusBadge(contrato.estatusContrato);
+            estatusCell.textContent = contrato.estatusContrato || 'N/A';
             estatusCell.setAttribute('data-label', 'Estatus');
-            
-            // Depósito
-            const depositoCell = row.insertCell();
-            depositoCell.textContent = contrato.depositoGarantia ? 
-                `$${parseFloat(contrato.depositoGarantia).toLocaleString()}` : 'N/A';
-            depositoCell.setAttribute('data-label', 'Depósito');
             
             // Actions column
             const actionsCell = row.insertCell();
             actionsCell.innerHTML = `
-                <div class="action-buttons">
-                    <button class="view-button" onclick="viewContrato(${contrato.idContrato})">
-                        Ver
-                    </button>
-                    <button class="edit-button" onclick="editContrato(${contrato.idContrato})">
-                        Editar
-                    </button>
-                    ${contrato.estatusContrato === 'ACTIVO' ? `
-                        <button class="renew-button" onclick="renewContrato(${contrato.idContrato})">
-                            Renovar
-                        </button>
-                        <button class="terminate-button" onclick="terminateContrato(${contrato.idContrato})">
-                            Terminar
-                        </button>
-                    ` : ''}
-                    <button class="delete-button" onclick="deleteContrato(${contrato.idContrato})">
-                        Eliminar
-                    </button>
-                </div>
+                <button class="edit-button" onclick="editContrato(${contrato.idContrato})">
+                    Editar
+                </button>
+                <button class="delete-button" onclick="deleteContrato(${contrato.idContrato}, '${(contrato.idContrato || 'Contrato').toString().replace(/'/g, "\\'")}')">
+                    Eliminar
+                </button>
             `;
             actionsCell.setAttribute('data-label', 'Acciones');
         });
@@ -170,31 +174,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
 
-    // Function to get status badge HTML
-    const getStatusBadge = (status) => {
-        if (!status) return '<span class="badge badge-secondary">N/A</span>';
-        
-        const statusClass = {
-            'ACTIVO': 'badge-success',
-            'VENCIDO': 'badge-warning',
-            'TERMINADO': 'badge-danger',
-            'SUSPENDIDO': 'badge-secondary'
-        };
-        
-        const badgeClass = statusClass[status.toUpperCase()] || 'badge-secondary';
-        return `<span class="badge ${badgeClass}">${status}</span>`;
-    };
-
-    // Function to check if contract is expiring soon
-    const isExpiringSoon = (contrato, days = 30) => {
-        if (!contrato.fechaFinContrato || contrato.estatusContrato !== 'ACTIVO') return false;
-        
-        const today = new Date();
-        const endDate = new Date(contrato.fechaFinContrato);
-        const daysUntilExpiration = Math.ceil((endDate - today) / (1000 * 60 * 60 * 24));
-        
-        return daysUntilExpiration <= days && daysUntilExpiration >= 0;
-    };
 
     // Initial fetch
     if (contratoTableBody) {
@@ -208,211 +187,20 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Event listener for Notifications button
-    if (notificationsButton) {
-        notificationsButton.addEventListener('click', () => {
-            showNotifications();
-        });
-    }
-
-    // Function to show notifications
-    const showNotifications = async () => {
-        const token = getAuthToken();
-        if (!token) {
-            alert('No autorizado. Por favor, inicie sesión.');
-            return;
-        }
-
-        try {
-            const response = await fetch(`${API_BASE_URL}/notificaciones`, {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            });
-
-            if (response.ok) {
-                const notifications = await response.json();
-                if (notifications.length === 0) {
-                    alert('No hay contratos que requieran notificaciones.');
-                } else {
-                    displayContratos(notifications);
-                    alert(`Se encontraron ${notifications.length} contrato(s) que requieren notificación.`);
-                }
-            }
-        } catch (error) {
-            console.error('Error fetching notifications:', error);
-            alert('Error al cargar las notificaciones.');
-        }
-    };
-
-    // Function to view contrato details
-    window.viewContrato = async (idContrato) => {
-        const token = getAuthToken();
-        if (!token) {
-            alert('No autorizado. Por favor, inicie sesión.');
-            return;
-        }
-
-        try {
-            const response = await fetch(`${API_BASE_URL}/${idContrato}`, {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            });
-
-            if (response.ok) {
-                const contrato = await response.json();
-                showContratoDetails(contrato);
-            } else {
-                alert('Error al cargar los detalles del contrato.');
-            }
-        } catch (error) {
-            console.error('Error fetching contrato details:', error);
-            alert('Error al cargar los detalles del contrato.');
-        }
-    };
-
-    // Function to show contrato details in modal
-    const showContratoDetails = (contrato) => {
-        const modal = document.getElementById('contratoModal');
-        const details = document.getElementById('contratoDetails');
-        const propiedadInfo = propiedadMap.get(contrato.idPropiedad);
-
-        details.innerHTML = `
-            <div class="details-grid">
-                <div class="detail-item">
-                    <strong>ID Contrato:</strong> ${contrato.idContrato}
-                </div>
-                <div class="detail-item">
-                    <strong>Propiedad:</strong> ${propiedadInfo ? `${propiedadInfo.tipo} - ${propiedadInfo.direccion}` : `ID: ${contrato.idPropiedad}`}
-                </div>
-                <div class="detail-item">
-                    <strong>Fecha Inicio:</strong> ${formatDate(contrato.fechaInicioContrato)}
-                </div>
-                <div class="detail-item">
-                    <strong>Fecha Fin:</strong> ${formatDate(contrato.fechaFinContrato)}
-                </div>
-                <div class="detail-item">
-                    <strong>Duración:</strong> ${contrato.duracionMeses || 'N/A'} meses
-                </div>
-                <div class="detail-item">
-                    <strong>Estatus:</strong> ${getStatusBadge(contrato.estatusContrato)}
-                </div>
-                <div class="detail-item">
-                    <strong>Depósito de Garantía:</strong> ${contrato.depositoGarantia ? `$${parseFloat(contrato.depositoGarantia).toLocaleString()}` : 'N/A'}
-                </div>
-                <div class="detail-item">
-                    <strong>Email Notificaciones:</strong> ${contrato.emailNotificaciones || 'N/A'}
-                </div>
-                <div class="detail-item">
-                    <strong>Teléfono Notificaciones:</strong> ${contrato.telefonoNotificaciones || 'N/A'}
-                </div>
-                <div class="detail-item">
-                    <strong>Notificación Días Previos:</strong> ${contrato.notificacionDiasPrevios || 'N/A'}
-                </div>
-                <div class="detail-item full-width">
-                    <strong>Condiciones Especiales:</strong> ${contrato.condicionesEspeciales || 'Ninguna'}
-                </div>
-            </div>
-        `;
-
-        modal.style.display = 'block';
-    };
 
     // Function to edit contrato
     window.editContrato = (idContrato) => {
         window.location.href = `contrato-edit.html?id=${idContrato}`;
     };
 
-    // Function to terminate contrato
-    window.terminateContrato = (idContrato) => {
-        const modal = document.getElementById('terminateModal');
-        modal.style.display = 'block';
-        
-        document.getElementById('confirmTerminate').onclick = () => {
-            performTerminateContrato(idContrato);
-            modal.style.display = 'none';
-        };
-    };
-
-    // Function to perform terminate contrato
-    const performTerminateContrato = async (idContrato) => {
-        const token = getAuthToken();
-        if (!token) {
-            alert('No autorizado. Por favor, inicie sesión.');
-            return;
-        }
-
-        try {
-            const response = await fetch(`${API_BASE_URL}/${idContrato}/terminar`, {
-                method: 'PATCH',
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            });
-
-            if (response.ok) {
-                alert('Contrato terminado exitosamente.');
-                fetchAllContratos();
-            } else {
-                alert('Error al terminar el contrato.');
-            }
-        } catch (error) {
-            console.error('Error terminating contrato:', error);
-            alert('Error al terminar el contrato.');
-        }
-    };
-
-    // Function to renew contrato
-    window.renewContrato = (idContrato) => {
-        const modal = document.getElementById('renewModal');
-        modal.style.display = 'block';
-        
-        document.getElementById('confirmRenew').onclick = () => {
-            const months = document.getElementById('renewMonths').value;
-            if (months && months > 0) {
-                performRenewContrato(idContrato, parseInt(months));
-                modal.style.display = 'none';
-            } else {
-                alert('Por favor ingrese un número válido de meses.');
-            }
-        };
-    };
-
-    // Function to perform renew contrato
-    const performRenewContrato = async (idContrato, months) => {
-        const token = getAuthToken();
-        if (!token) {
-            alert('No autorizado. Por favor, inicie sesión.');
-            return;
-        }
-
-        try {
-            const response = await fetch(`${API_BASE_URL}/${idContrato}/renovar?meses=${months}`, {
-                method: 'PATCH',
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            });
-
-            if (response.ok) {
-                alert(`Contrato renovado exitosamente por ${months} meses.`);
-                fetchAllContratos();
-            } else {
-                alert('Error al renovar el contrato.');
-            }
-        } catch (error) {
-            console.error('Error renewing contrato:', error);
-            alert('Error al renovar el contrato.');
-        }
-    };
 
     // Function to delete contrato
-    window.deleteContrato = async (idContrato) => {
-        if (confirm('¿Está seguro que desea eliminar este contrato?')) {
+    window.deleteContrato = async (idContrato, contratoLabel) => {
+        if (confirm(`¿Está seguro que desea eliminar el contrato "${contratoLabel}"?`)) {
             const token = getAuthToken();
             if (!token) {
                 alert('No autorizado. Por favor, inicie sesión.');
+                window.location.href = 'login.html';
                 return;
             }
 
@@ -424,12 +212,23 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 });
 
-                if (response.ok) {
-                    alert('Contrato eliminado exitosamente.');
-                    fetchAllContratos();
-                } else {
-                    alert('Error al eliminar el contrato.');
+                if (response.status === 401) {
+                    alert('Sesión expirada o no autorizado. Por favor, inicie sesión nuevamente.');
+                    window.location.href = 'login.html';
+                    return;
                 }
+
+                if (response.status === 404) {
+                    alert('Contrato no encontrado.');
+                    return;
+                }
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                alert('Contrato eliminado exitosamente.');
+                fetchAllContratos(); // Refresh the list
             } catch (error) {
                 console.error('Error deleting contrato:', error);
                 alert('Error al eliminar el contrato.');
@@ -480,6 +279,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'duracion':
                     value = contrato.duracionMeses;
                     break;
+                case 'inmobiliaria':
+                    const propInfo = propiedadMap.get(contrato.idPropiedad);
+                    if (propInfo && propInfo.idInmobiliaria) {
+                        value = inmobiliariaMap.get(propInfo.idInmobiliaria);
+                    }
+                    break;
             }
             
             if (value !== null && value !== undefined && value !== '') {
@@ -514,8 +319,15 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (selectedFilter === 'proximosVencer') {
+            dateFilterGroup.style.display = 'block';
             const days = parseInt(dateFilter.value) || 30;
-            const filteredContratos = allContratos.filter(contrato => isExpiringSoon(contrato, days));
+            const today = new Date();
+            const filteredContratos = allContratos.filter(contrato => {
+                if (!contrato.fechaFinContrato || contrato.estatusContrato !== 'ACTIVO') return false;
+                const endDate = new Date(contrato.fechaFinContrato);
+                const daysUntilExpiration = Math.ceil((endDate - today) / (1000 * 60 * 60 * 24));
+                return daysUntilExpiration <= days && daysUntilExpiration >= 0;
+            });
             displayContratos(filteredContratos);
             return;
         }
@@ -536,6 +348,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     return propiedadDisplay === selectedValue;
                 case 'duracion':
                     return contrato.duracionMeses === parseInt(selectedValue);
+                case 'inmobiliaria':
+                    const propInfo = propiedadMap.get(contrato.idPropiedad);
+                    if (propInfo && propInfo.idInmobiliaria) {
+                        const inmobiliariaName = inmobiliariaMap.get(propInfo.idInmobiliaria);
+                        return inmobiliariaName === selectedValue;
+                    }
+                    return false;
                 default:
                     return true;
             }
@@ -567,31 +386,4 @@ document.addEventListener('DOMContentLoaded', () => {
         clearFilterButton.addEventListener('click', clearFilter);
     }
 
-    // Modal functionality
-    const modals = document.querySelectorAll('.modal');
-    const closeButtons = document.querySelectorAll('.close');
-
-    closeButtons.forEach(button => {
-        button.addEventListener('click', (e) => {
-            e.target.closest('.modal').style.display = 'none';
-        });
-    });
-
-    // Cancel buttons
-    document.getElementById('cancelTerminate')?.addEventListener('click', () => {
-        document.getElementById('terminateModal').style.display = 'none';
-    });
-
-    document.getElementById('cancelRenew')?.addEventListener('click', () => {
-        document.getElementById('renewModal').style.display = 'none';
-    });
-
-    // Close modal when clicking outside
-    window.addEventListener('click', (e) => {
-        modals.forEach(modal => {
-            if (e.target === modal) {
-                modal.style.display = 'none';
-            }
-        });
-    });
 });
