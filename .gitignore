@@ -26,6 +26,9 @@ Servers/
 # Ignorar credenciales de Claude
 .claude/
 
+# Ignorar archivos de configuración con datos sensibles
+src/main/resources/application.properties
+
 # External tool builders
 .externalToolBuilders/
 
