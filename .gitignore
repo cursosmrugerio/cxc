@@ -19,6 +19,12 @@ Servers/
 */*/*/target
 **/.DS_Store
 
+# Ignorar credenciales de Gemini
+.gemini/
+
+# Ignorar credenciales de Claude
+.claude/
+
 # External tool builders
 .externalToolBuilders/
 
