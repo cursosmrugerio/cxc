@@ -1384,6 +1384,129 @@ body.menu-open {
     box-shadow: 0 6px 20px rgba(108, 117, 125, 0.4);
 }
 
+/* ================================
+   Contrato Form Button Styles
+   ================================ */
+
+#contratoAddForm button, #contratoEditForm button {
+    padding: 1rem 2rem;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    min-width: 150px;
+}
+
+#contratoAddForm button[type="submit"], #contratoEditForm button[type="submit"] {
+    background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+    color: white;
+    box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+}
+
+#contratoAddForm button[type="submit"]:hover, #contratoEditForm button[type="submit"]:hover {
+    background: linear-gradient(135deg, #45a049 0%, #3e8e41 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
+}
+
+#contratoAddForm button[type="button"], #contratoEditForm button[type="button"] {
+    background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
+    color: white;
+    box-shadow: 0 4px 15px rgba(108, 117, 125, 0.3);
+}
+
+#contratoAddForm button[type="button"]:hover, #contratoEditForm button[type="button"]:hover {
+    background: linear-gradient(135deg, #5a6268 0%, #495057 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(108, 117, 125, 0.4);
+}
+
+/* ================================
+   Concepto Pago Form Button Styles
+   ================================ */
+
+#conceptoPagoAddForm button, #conceptoPagoEditForm button {
+    padding: 1rem 2rem;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    min-width: 150px;
+}
+
+#conceptoPagoAddForm button[type="submit"], #conceptoPagoEditForm button[type="submit"] {
+    background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+    color: white;
+    box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+}
+
+#conceptoPagoAddForm button[type="submit"]:hover, #conceptoPagoEditForm button[type="submit"]:hover {
+    background: linear-gradient(135deg, #45a049 0%, #3e8e41 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
+}
+
+#conceptoPagoAddForm button[type="button"], #conceptoPagoEditForm button[type="button"] {
+    background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
+    color: white;
+    box-shadow: 0 4px 15px rgba(108, 117, 125, 0.3);
+}
+
+#conceptoPagoAddForm button[type="button"]:hover, #conceptoPagoEditForm button[type="button"]:hover {
+    background: linear-gradient(135deg, #5a6268 0%, #495057 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(108, 117, 125, 0.4);
+}
+
+/* ================================
+   Configuracion Recargo Form Button Styles
+   ================================ */
+
+#configuracionRecargoAddForm button, #configuracionRecargoEditForm button {
+    padding: 1rem 2rem;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    min-width: 150px;
+}
+
+#configuracionRecargoAddForm button[type="submit"], #configuracionRecargoEditForm button[type="submit"] {
+    background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+    color: white;
+    box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+}
+
+#configuracionRecargoAddForm button[type="submit"]:hover, #configuracionRecargoEditForm button[type="submit"]:hover {
+    background: linear-gradient(135deg, #45a049 0%, #3e8e41 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
+}
+
+#configuracionRecargoAddForm button[type="button"], #configuracionRecargoEditForm button[type="button"] {
+    background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
+    color: white;
+    box-shadow: 0 4px 15px rgba(108, 117, 125, 0.3);
+}
+
+#configuracionRecargoAddForm button[type="button"]:hover, #configuracionRecargoEditForm button[type="button"]:hover {
+    background: linear-gradient(135deg, #5a6268 0%, #495057 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(108, 117, 125, 0.4);
+}
+
 /* Concepto-specific styles */
 .concepto-list {
     background: white;
