@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureWebMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
@@ -67,6 +68,7 @@ class ConfiguracionRecargosIntegrationTest {
     @DisplayName("Should create configuracion recargo successfully")
     void shouldCreateConfiguracionRecargoSuccessfully() throws Exception {
         mockMvc.perform(post("/api/v1/configuracion-recargos")
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(testDto)))
                 .andExpect(status().isCreated())
@@ -130,6 +132,7 @@ class ConfiguracionRecargosIntegrationTest {
         );
 
         mockMvc.perform(put("/api/v1/configuracion-recargos/{id}", saved.getIdConfiguracionRecargo())
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(updateDto)))
                 .andExpect(status().isOk())
@@ -145,7 +148,8 @@ class ConfiguracionRecargosIntegrationTest {
         ConfiguracionRecargos entity = createTestEntity();
         ConfiguracionRecargos saved = repository.save(entity);
 
-        mockMvc.perform(delete("/api/v1/configuracion-recargos/{id}", saved.getIdConfiguracionRecargo()))
+        mockMvc.perform(delete("/api/v1/configuracion-recargos/{id}", saved.getIdConfiguracionRecargo())
+                        .with(csrf()))
                 .andExpect(status().isNoContent());
 
         mockMvc.perform(get("/api/v1/configuracion-recargos/{id}", saved.getIdConfiguracionRecargo()))
@@ -173,7 +177,8 @@ class ConfiguracionRecargosIntegrationTest {
         ConfiguracionRecargos entity = createTestEntity();
         ConfiguracionRecargos saved = repository.save(entity);
 
-        mockMvc.perform(patch("/api/v1/configuracion-recargos/{id}/toggle-active", saved.getIdConfiguracionRecargo()))
+        mockMvc.perform(patch("/api/v1/configuracion-recargos/{id}/toggle-active", saved.getIdConfiguracionRecargo())
+                        .with(csrf()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.activo").value(false));
     }
