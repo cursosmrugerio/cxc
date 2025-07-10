@@ -1,0 +1,21 @@
+# Database Configuration
+spring.datasource.url=${DB_URL:jdbc:postgresql://localhost:5432/inmobiliaria}
+spring.datasource.username=${DB_USERNAME:postgres}
+spring.datasource.password=${DB_PASSWORD:}
+spring.jpa.hibernate.ddl-auto=${DDL_AUTO:update}
+spring.jpa.show-sql=${SHOW_SQL:true}
+
+# OpenAPI Configuration
+springdoc.api-docs.path=/api-docs
+springdoc.swagger-ui.path=/swagger-ui.html
+
+# JWT Configuration
+jwt.secret=${JWT_SECRET:}
+jwt.expiration=${JWT_EXPIRATION:86400}
+
+# Logging Configuration
+logging.level.com.inmobiliaria.gestion.security=${LOG_LEVEL_SECURITY:INFO}
+logging.level.org.springframework.security=${LOG_LEVEL_SPRING_SECURITY:INFO}
+
+# Server Configuration
+server.port=${SERVER_PORT:8080}
