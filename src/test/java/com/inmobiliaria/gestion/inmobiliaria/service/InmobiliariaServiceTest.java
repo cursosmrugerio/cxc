@@ -555,4 +555,297 @@ class InmobiliariaServiceTest {
                     "NotFound", null, null, null, pageable);
         }
     }
+
+    @Nested
+    @DisplayName("Conditional Logic and Branch Coverage Tests")
+    class ConditionalLogicBranchTests {
+
+        @Test
+        @DisplayName("Should apply default values when fields are null in create")
+        void shouldApplyDefaultValuesWhenFieldsAreNullInCreate() {
+            // Given - DTO without optional fields
+            InmobiliariaDTO dtoWithNulls = new InmobiliariaDTO(
+                    null,
+                    "Test Inmobiliaria",
+                    "Test Legal Name",
+                    "TEST123456789",
+                    "555-1234",
+                    "test@test.com",
+                    "Test Address",
+                    "Test City",
+                    "Test State",
+                    "12345",
+                    "Test Contact",
+                    null,     // fechaRegistro null
+                    null      // estatus null
+            );
+
+            Inmobiliaria savedInmobiliaria = new Inmobiliaria();
+            savedInmobiliaria.setIdInmobiliaria(1L);
+            savedInmobiliaria.setNombreComercial("Test Inmobiliaria");
+            savedInmobiliaria.setRazonSocial("Test Legal Name");
+            savedInmobiliaria.setRfcNit("TEST123456789");
+            savedInmobiliaria.setTelefonoPrincipal("555-1234");
+            savedInmobiliaria.setEmailContacto("test@test.com");
+            savedInmobiliaria.setDireccionCompleta("Test Address");
+            savedInmobiliaria.setCiudad("Test City");
+            savedInmobiliaria.setEstado("Test State");
+            savedInmobiliaria.setCodigoPostal("12345");
+            savedInmobiliaria.setPersonaContacto("Test Contact");
+            savedInmobiliaria.setFechaRegistro(LocalDate.now()); // default applied
+            savedInmobiliaria.setEstatus("ACTIVE"); // default applied
+
+            when(inmobiliariaRepository.existsByRfcNit("TEST123456789")).thenReturn(false);
+            when(inmobiliariaRepository.save(any(Inmobiliaria.class))).thenReturn(savedInmobiliaria);
+
+            // When
+            InmobiliariaDTO result = inmobiliariaService.create(dtoWithNulls);
+
+            // Then - Verify default values were applied
+            assertThat(result).isNotNull();
+            assertThat(result.fechaRegistro()).isEqualTo(LocalDate.now());
+            assertThat(result.estatus()).isEqualTo("ACTIVE");
+        }
+
+        @Test
+        @DisplayName("Should preserve provided values when fields are not null in create")
+        void shouldPreserveProvidedValuesWhenFieldsAreNotNullInCreate() {
+            // Given - DTO with all fields provided
+            LocalDate providedDate = LocalDate.of(2023, 1, 1);
+            InmobiliariaDTO dtoWithValues = new InmobiliariaDTO(
+                    null,
+                    "Test Inmobiliaria",
+                    "Test Legal Name",
+                    "TEST123456789",
+                    "555-1234",
+                    "test@test.com",
+                    "Test Address",
+                    "Test City",
+                    "Test State",
+                    "12345",
+                    "Test Contact",
+                    providedDate,    // fechaRegistro provided
+                    "INACTIVE"       // estatus provided
+            );
+
+            Inmobiliaria savedInmobiliaria = new Inmobiliaria();
+            savedInmobiliaria.setIdInmobiliaria(1L);
+            savedInmobiliaria.setNombreComercial("Test Inmobiliaria");
+            savedInmobiliaria.setRazonSocial("Test Legal Name");
+            savedInmobiliaria.setRfcNit("TEST123456789");
+            savedInmobiliaria.setTelefonoPrincipal("555-1234");
+            savedInmobiliaria.setEmailContacto("test@test.com");
+            savedInmobiliaria.setDireccionCompleta("Test Address");
+            savedInmobiliaria.setCiudad("Test City");
+            savedInmobiliaria.setEstado("Test State");
+            savedInmobiliaria.setCodigoPostal("12345");
+            savedInmobiliaria.setPersonaContacto("Test Contact");
+            savedInmobiliaria.setFechaRegistro(providedDate); // preserved
+            savedInmobiliaria.setEstatus("INACTIVE"); // preserved
+
+            when(inmobiliariaRepository.existsByRfcNit("TEST123456789")).thenReturn(false);
+            when(inmobiliariaRepository.save(any(Inmobiliaria.class))).thenReturn(savedInmobiliaria);
+
+            // When
+            InmobiliariaDTO result = inmobiliariaService.create(dtoWithValues);
+
+            // Then - Verify provided values were preserved
+            assertThat(result).isNotNull();
+            assertThat(result.fechaRegistro()).isEqualTo(providedDate);
+            assertThat(result.estatus()).isEqualTo("INACTIVE");
+        }
+
+        @Test
+        @DisplayName("Should handle blank estatus by applying default in create")
+        void shouldHandleBlankEstatusByApplyingDefaultInCreate() {
+            // Given - DTO with blank estatus
+            InmobiliariaDTO dtoWithBlankStatus = new InmobiliariaDTO(
+                    null,
+                    "Test Inmobiliaria",
+                    "Test Legal Name",
+                    "TEST123456789",
+                    "555-1234",
+                    "test@test.com",
+                    "Test Address",
+                    "Test City",
+                    "Test State",
+                    "12345",
+                    "Test Contact",
+                    LocalDate.now(),
+                    "   "      // blank estatus (whitespace)
+            );
+
+            Inmobiliaria savedInmobiliaria = new Inmobiliaria();
+            savedInmobiliaria.setIdInmobiliaria(1L);
+            savedInmobiliaria.setNombreComercial("Test Inmobiliaria");
+            savedInmobiliaria.setRazonSocial("Test Legal Name");
+            savedInmobiliaria.setRfcNit("TEST123456789");
+            savedInmobiliaria.setTelefonoPrincipal("555-1234");
+            savedInmobiliaria.setEmailContacto("test@test.com");
+            savedInmobiliaria.setDireccionCompleta("Test Address");
+            savedInmobiliaria.setCiudad("Test City");
+            savedInmobiliaria.setEstado("Test State");
+            savedInmobiliaria.setCodigoPostal("12345");
+            savedInmobiliaria.setPersonaContacto("Test Contact");
+            savedInmobiliaria.setFechaRegistro(LocalDate.now());
+            savedInmobiliaria.setEstatus("ACTIVE"); // default applied for blank
+
+            when(inmobiliariaRepository.existsByRfcNit("TEST123456789")).thenReturn(false);
+            when(inmobiliariaRepository.save(any(Inmobiliaria.class))).thenReturn(savedInmobiliaria);
+
+            // When
+            InmobiliariaDTO result = inmobiliariaService.create(dtoWithBlankStatus);
+
+            // Then - Verify default was applied for blank estatus
+            assertThat(result).isNotNull();
+            assertThat(result.estatus()).isEqualTo("ACTIVE");
+        }
+
+        @Test
+        @DisplayName("Should throw exception when duplicate RFC/NIT in create")
+        void shouldThrowExceptionWhenDuplicateRfcNitInCreate() {
+            // Given - DTO with duplicate RFC/NIT
+            when(inmobiliariaRepository.existsByRfcNit(testInmobiliariaDTO.rfcNit())).thenReturn(true);
+
+            // When & Then - Should throw exception (duplicate validation branch)
+            assertThatThrownBy(() -> inmobiliariaService.create(testInmobiliariaDTO))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessage("RFC/NIT already exists: " + testInmobiliariaDTO.rfcNit());
+
+            verify(inmobiliariaRepository, never()).save(any());
+        }
+
+        @Test
+        @DisplayName("Should throw exception when duplicate RFC/NIT in update but different inmobiliaria")
+        void shouldThrowExceptionWhenDuplicateRfcNitInUpdateButDifferentInmobiliaria() {
+            // Given - Update with RFC/NIT that exists for different inmobiliaria
+            InmobiliariaDTO updateDTO = new InmobiliariaDTO(
+                    1L,
+                    "Updated Name",
+                    "Updated Legal",
+                    "EXISTING_RFC",  // RFC that exists for different inmobiliaria
+                    "555-9999",
+                    "updated@test.com",
+                    "Updated Address",
+                    "Updated City",
+                    "Updated State",
+                    "99999",
+                    "Updated Contact",
+                    LocalDate.now(),
+                    "ACTIVE"
+            );
+
+            when(inmobiliariaRepository.findById(1L)).thenReturn(Optional.of(testInmobiliaria));
+            when(inmobiliariaRepository.existsByRfcNitAndIdInmobiliariaNot("EXISTING_RFC", 1L))
+                    .thenReturn(true);
+
+            // When & Then - Should throw exception (duplicate RFC for different inmobiliaria)
+            assertThatThrownBy(() -> inmobiliariaService.update(1L, updateDTO))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessage("RFC/NIT already exists: EXISTING_RFC");
+
+            verify(inmobiliariaRepository, never()).save(any());
+        }
+
+        @Test
+        @DisplayName("Should allow update with same RFC/NIT for same inmobiliaria")
+        void shouldAllowUpdateWithSameRfcNitForSameInmobiliaria() {
+            // Given - Update with same RFC/NIT (should be allowed)
+            InmobiliariaDTO updateDTO = new InmobiliariaDTO(
+                    1L,
+                    "Updated Name",
+                    "Updated Legal",
+                    testInmobiliaria.getRfcNit(),  // Same RFC/NIT
+                    "555-9999",
+                    "updated@test.com",
+                    "Updated Address",
+                    "Updated City",
+                    "Updated State",
+                    "99999",
+                    "Updated Contact",
+                    LocalDate.now(),
+                    "ACTIVE"
+            );
+
+            Inmobiliaria updatedInmobiliaria = new Inmobiliaria();
+            updatedInmobiliaria.setIdInmobiliaria(1L);
+            updatedInmobiliaria.setNombreComercial("Updated Name");
+            updatedInmobiliaria.setRazonSocial("Updated Legal");
+            updatedInmobiliaria.setRfcNit(testInmobiliaria.getRfcNit());
+            updatedInmobiliaria.setTelefonoPrincipal("555-9999");
+            updatedInmobiliaria.setEmailContacto("updated@test.com");
+            updatedInmobiliaria.setDireccionCompleta("Updated Address");
+            updatedInmobiliaria.setCiudad("Updated City");
+            updatedInmobiliaria.setEstado("Updated State");
+            updatedInmobiliaria.setCodigoPostal("99999");
+            updatedInmobiliaria.setPersonaContacto("Updated Contact");
+            updatedInmobiliaria.setFechaRegistro(LocalDate.now());
+            updatedInmobiliaria.setEstatus("ACTIVE");
+
+            when(inmobiliariaRepository.findById(1L)).thenReturn(Optional.of(testInmobiliaria));
+            when(inmobiliariaRepository.save(any(Inmobiliaria.class))).thenReturn(updatedInmobiliaria);
+
+            // When
+            InmobiliariaDTO result = inmobiliariaService.update(1L, updateDTO);
+
+            // Then - Should update successfully
+            assertThat(result).isNotNull();
+            assertThat(result.nombreComercial()).isEqualTo("Updated Name");
+            verify(inmobiliariaRepository, times(1)).save(any());
+        }
+
+        @Test
+        @DisplayName("Should handle edge cases in estatus validation")
+        void shouldHandleEdgeCasesInEstatusValidation() {
+            // Test different estatus edge cases
+            String[] edgeCaseStatuses = {
+                "",           // empty string
+                "   ",        // whitespace only
+                "\t\n",       // tabs and newlines
+                null          // null value
+            };
+
+            for (String edgeStatus : edgeCaseStatuses) {
+                InmobiliariaDTO dtoWithEdgeStatus = new InmobiliariaDTO(
+                        null,
+                        "Test Inmobiliaria",
+                        "Test Legal Name",
+                        "TEST" + Math.random(), // Unique RFC for each test
+                        "555-1234",
+                        "test@test.com",
+                        "Test Address",
+                        "Test City",
+                        "Test State",
+                        "12345",
+                        "Test Contact",
+                        LocalDate.now(),
+                        edgeStatus
+                );
+
+                Inmobiliaria savedInmobiliaria = new Inmobiliaria();
+                savedInmobiliaria.setIdInmobiliaria(1L);
+                savedInmobiliaria.setNombreComercial("Test Inmobiliaria");
+                savedInmobiliaria.setRazonSocial("Test Legal Name");
+                savedInmobiliaria.setRfcNit(dtoWithEdgeStatus.rfcNit());
+                savedInmobiliaria.setTelefonoPrincipal("555-1234");
+                savedInmobiliaria.setEmailContacto("test@test.com");
+                savedInmobiliaria.setDireccionCompleta("Test Address");
+                savedInmobiliaria.setCiudad("Test City");
+                savedInmobiliaria.setEstado("Test State");
+                savedInmobiliaria.setCodigoPostal("12345");
+                savedInmobiliaria.setPersonaContacto("Test Contact");
+                savedInmobiliaria.setFechaRegistro(LocalDate.now());
+                savedInmobiliaria.setEstatus("ACTIVE"); // Default should be applied
+
+                when(inmobiliariaRepository.existsByRfcNit(dtoWithEdgeStatus.rfcNit())).thenReturn(false);
+                when(inmobiliariaRepository.save(any(Inmobiliaria.class))).thenReturn(savedInmobiliaria);
+
+                // When
+                InmobiliariaDTO result = inmobiliariaService.create(dtoWithEdgeStatus);
+
+                // Then - Should apply default "ACTIVE" for all edge cases
+                assertThat(result.estatus()).isEqualTo("ACTIVE");
+            }
+        }
+    }
 }

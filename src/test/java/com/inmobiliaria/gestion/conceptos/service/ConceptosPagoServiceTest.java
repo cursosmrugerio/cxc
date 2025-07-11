@@ -381,6 +381,234 @@ class ConceptosPagoServiceTest {
     }
 
     @Nested
+    @DisplayName("Conditional Logic and Branch Coverage Tests")
+    class ConditionalLogicTests {
+
+        @Test
+        @DisplayName("Should apply default values when fields are null in create")
+        void shouldApplyDefaultValuesWhenFieldsAreNullInCreate() {
+            // Given - Request without optional fields
+            ConceptosPagoCreateRequest request = new ConceptosPagoCreateRequest(
+                    1L,
+                    "Test Concepto",
+                    "Test Description",
+                    "TEST",
+                    null, // permiteRecargos null
+                    null  // activo null
+            );
+
+            ConceptosPago conceptoToSave = new ConceptosPago();
+            conceptoToSave.setIdInmobiliaria(1L);
+            conceptoToSave.setNombreConcepto("Test Concepto");
+            conceptoToSave.setDescripcion("Test Description");
+            conceptoToSave.setTipoConcepto("TEST");
+            // fechaCreacion will be null initially
+
+            ConceptosPago savedConcepto = new ConceptosPago();
+            savedConcepto.setIdConcepto(1);
+            savedConcepto.setIdInmobiliaria(1L);
+            savedConcepto.setNombreConcepto("Test Concepto");
+            savedConcepto.setDescripcion("Test Description");
+            savedConcepto.setTipoConcepto("TEST");
+            savedConcepto.setPermiteRecargos(false); // default value applied
+            savedConcepto.setActivo(true); // default value applied
+            savedConcepto.setFechaCreacion(LocalDate.now()); // default value applied
+
+            when(conceptosPagoRepository.existsByIdInmobiliariaAndNombreConcepto(1L, "Test Concepto"))
+                    .thenReturn(false);
+            when(conceptosPagoRepository.save(any(ConceptosPago.class))).thenReturn(savedConcepto);
+
+            // When
+            ConceptosPagoDTO result = conceptosPagoService.create(request);
+
+            // Then - Verify default values were applied
+            assertThat(result).isNotNull();
+            assertThat(result.permiteRecargos()).isFalse(); // default applied
+            assertThat(result.activo()).isTrue(); // default applied
+            assertThat(result.fechaCreacion()).isEqualTo(LocalDate.now()); // default applied
+        }
+
+        @Test
+        @DisplayName("Should preserve provided values when fields are not null in create")
+        void shouldPreserveProvidedValuesWhenFieldsAreNotNullInCreate() {
+            // Given - Request with all optional fields provided
+            ConceptosPagoCreateRequest request = new ConceptosPagoCreateRequest(
+                    1L,
+                    "Test Concepto",
+                    "Test Description",
+                    "TEST",
+                    true, // permiteRecargos provided
+                    false // activo provided
+            );
+
+            ConceptosPago savedConcepto = new ConceptosPago();
+            savedConcepto.setIdConcepto(1);
+            savedConcepto.setIdInmobiliaria(1L);
+            savedConcepto.setNombreConcepto("Test Concepto");
+            savedConcepto.setDescripcion("Test Description");
+            savedConcepto.setTipoConcepto("TEST");
+            savedConcepto.setPermiteRecargos(true); // preserved value
+            savedConcepto.setActivo(false); // preserved value
+            savedConcepto.setFechaCreacion(LocalDate.now());
+
+            when(conceptosPagoRepository.existsByIdInmobiliariaAndNombreConcepto(1L, "Test Concepto"))
+                    .thenReturn(false);
+            when(conceptosPagoRepository.save(any(ConceptosPago.class))).thenReturn(savedConcepto);
+
+            // When
+            ConceptosPagoDTO result = conceptosPagoService.create(request);
+
+            // Then - Verify provided values were preserved
+            assertThat(result).isNotNull();
+            assertThat(result.permiteRecargos()).isTrue(); // preserved
+            assertThat(result.activo()).isFalse(); // preserved
+        }
+
+        @Test
+        @DisplayName("Should apply default values when fields are null in update")
+        void shouldApplyDefaultValuesWhenFieldsAreNullInUpdate() {
+            // Given - Update request with null optional fields
+            ConceptosPagoUpdateRequest request = new ConceptosPagoUpdateRequest(
+                    "Updated Name",
+                    "Updated Description",
+                    "UPDATED",
+                    null, // permiteRecargos null
+                    null  // activo null
+            );
+
+            when(conceptosPagoRepository.findById(1)).thenReturn(Optional.of(testConcepto));
+            when(conceptosPagoRepository.existsByIdInmobiliariaAndNombreConceptoAndIdConceptoNot(
+                    1L, "Updated Name", 1)).thenReturn(false);
+
+            ConceptosPago updatedConcepto = new ConceptosPago();
+            updatedConcepto.setIdConcepto(1);
+            updatedConcepto.setIdInmobiliaria(1L);
+            updatedConcepto.setNombreConcepto("Updated Name");
+            updatedConcepto.setDescripcion("Updated Description");
+            updatedConcepto.setTipoConcepto("UPDATED");
+            updatedConcepto.setPermiteRecargos(false); // default applied
+            updatedConcepto.setActivo(true); // default applied
+
+            when(conceptosPagoRepository.save(any(ConceptosPago.class))).thenReturn(updatedConcepto);
+
+            // When
+            ConceptosPagoDTO result = conceptosPagoService.update(1, request);
+
+            // Then - Verify default values were applied
+            assertThat(result).isNotNull();
+            assertThat(result.permiteRecargos()).isFalse(); // default applied
+            assertThat(result.activo()).isTrue(); // default applied
+        }
+
+        @Test
+        @DisplayName("Should preserve provided values when fields are not null in update")
+        void shouldPreserveProvidedValuesWhenFieldsAreNotNullInUpdate() {
+            // Given - Update request with provided optional fields
+            ConceptosPagoUpdateRequest request = new ConceptosPagoUpdateRequest(
+                    "Updated Name",
+                    "Updated Description",
+                    "UPDATED",
+                    true, // permiteRecargos provided
+                    false // activo provided
+            );
+
+            when(conceptosPagoRepository.findById(1)).thenReturn(Optional.of(testConcepto));
+            when(conceptosPagoRepository.existsByIdInmobiliariaAndNombreConceptoAndIdConceptoNot(
+                    1L, "Updated Name", 1)).thenReturn(false);
+
+            ConceptosPago updatedConcepto = new ConceptosPago();
+            updatedConcepto.setIdConcepto(1);
+            updatedConcepto.setIdInmobiliaria(1L);
+            updatedConcepto.setNombreConcepto("Updated Name");
+            updatedConcepto.setDescripcion("Updated Description");
+            updatedConcepto.setTipoConcepto("UPDATED");
+            updatedConcepto.setPermiteRecargos(true); // preserved
+            updatedConcepto.setActivo(false); // preserved
+
+            when(conceptosPagoRepository.save(any(ConceptosPago.class))).thenReturn(updatedConcepto);
+
+            // When
+            ConceptosPagoDTO result = conceptosPagoService.update(1, request);
+
+            // Then - Verify provided values were preserved
+            assertThat(result).isNotNull();
+            assertThat(result.permiteRecargos()).isTrue(); // preserved
+            assertThat(result.activo()).isFalse(); // preserved
+        }
+
+        @Test
+        @DisplayName("Should throw exception when duplicate name in create")
+        void shouldThrowExceptionWhenDuplicateNameInCreate() {
+            // Given - Request with duplicate name
+            ConceptosPagoCreateRequest request = new ConceptosPagoCreateRequest(
+                    1L, "Duplicate Name", "Description", "TEST", true, true
+            );
+
+            when(conceptosPagoRepository.existsByIdInmobiliariaAndNombreConcepto(1L, "Duplicate Name"))
+                    .thenReturn(true);
+
+            // When & Then - Should throw exception
+            assertThatThrownBy(() -> conceptosPagoService.create(request))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessage("Concept name already exists for this inmobiliaria: Duplicate Name");
+
+            verify(conceptosPagoRepository, never()).save(any());
+        }
+
+        @Test
+        @DisplayName("Should throw exception when duplicate name in update")
+        void shouldThrowExceptionWhenDuplicateNameInUpdate() {
+            // Given - Update request with duplicate name
+            ConceptosPagoUpdateRequest request = new ConceptosPagoUpdateRequest(
+                    "Duplicate Name", "Description", "TEST", true, true
+            );
+
+            when(conceptosPagoRepository.findById(1)).thenReturn(Optional.of(testConcepto));
+            when(conceptosPagoRepository.existsByIdInmobiliariaAndNombreConceptoAndIdConceptoNot(
+                    1L, "Duplicate Name", 1)).thenReturn(true);
+
+            // When & Then - Should throw exception
+            assertThatThrownBy(() -> conceptosPagoService.update(1, request))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessage("Concept name already exists for this inmobiliaria: Duplicate Name");
+
+            verify(conceptosPagoRepository, never()).save(any());
+        }
+
+        @Test
+        @DisplayName("Should not throw exception when same name but different inmobiliaria in create")
+        void shouldNotThrowExceptionWhenSameNameButDifferentInmobiliariaInCreate() {
+            // Given - Same name but different inmobiliaria should be allowed
+            ConceptosPagoCreateRequest request = new ConceptosPagoCreateRequest(
+                    2L, "Same Name", "Description", "TEST", true, true
+            );
+
+            when(conceptosPagoRepository.existsByIdInmobiliariaAndNombreConcepto(2L, "Same Name"))
+                    .thenReturn(false);
+
+            ConceptosPago savedConcepto = new ConceptosPago();
+            savedConcepto.setIdConcepto(1);
+            savedConcepto.setIdInmobiliaria(2L);
+            savedConcepto.setNombreConcepto("Same Name");
+            savedConcepto.setDescripcion("Description");
+            savedConcepto.setTipoConcepto("TEST");
+            savedConcepto.setPermiteRecargos(true);
+            savedConcepto.setActivo(true);
+            savedConcepto.setFechaCreacion(LocalDate.now());
+
+            when(conceptosPagoRepository.save(any(ConceptosPago.class))).thenReturn(savedConcepto);
+
+            // When
+            ConceptosPagoDTO result = conceptosPagoService.create(request);
+
+            // Then - Should create successfully
+            assertThat(result).isNotNull();
+            assertThat(result.idInmobiliaria()).isEqualTo(2L);
+            assertThat(result.nombreConcepto()).isEqualTo("Same Name");
+        }
+    }
+
+    @Nested
     @DisplayName("Delete Operations")
     class DeleteOperations {
 
