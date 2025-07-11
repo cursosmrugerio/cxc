@@ -19,6 +19,8 @@ Servers/
 */*/*/target
 **/.DS_Store
 .mcp.json
+gemini.md
+claude.md
 
 # Ignorar credenciales de Gemini
 .gemini/
