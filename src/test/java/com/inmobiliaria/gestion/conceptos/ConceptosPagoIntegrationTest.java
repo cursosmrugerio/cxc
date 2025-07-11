@@ -5,6 +5,10 @@ import com.inmobiliaria.gestion.conceptos.dto.ConceptosPagoCreateRequest;
 import com.inmobiliaria.gestion.conceptos.dto.ConceptosPagoUpdateRequest;
 import com.inmobiliaria.gestion.conceptos.model.ConceptosPago;
 import com.inmobiliaria.gestion.conceptos.repository.ConceptosPagoRepository;
+import com.inmobiliaria.gestion.auth.model.Role;
+import com.inmobiliaria.gestion.auth.model.User;
+import com.inmobiliaria.gestion.auth.repository.RoleRepository;
+import com.inmobiliaria.gestion.auth.repository.UserRepository;
 import com.inmobiliaria.gestion.security.JwtUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -14,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureWebMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -23,6 +28,7 @@ import org.springframework.web.context.WebApplicationContext;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.hasSize;
@@ -46,6 +52,15 @@ class ConceptosPagoIntegrationTest {
     private ConceptosPagoRepository conceptosPagoRepository;
 
     @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private RoleRepository roleRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    @Autowired
     private JwtUtil jwtUtil;
 
     @Autowired
@@ -64,12 +79,22 @@ class ConceptosPagoIntegrationTest {
                 .apply(springSecurity())
                 .build();
 
-        // Clean repository
+        // Clean repositories
         conceptosPagoRepository.deleteAll();
+        userRepository.deleteAll();
+        roleRepository.deleteAll();
+
+        // Create roles
+        Role adminRole = createRole("ROLE_ADMIN");
+        Role userRole = createRole("ROLE_USER");
+
+        // Create test users
+        User adminUser = createUser("admin", "admin@test.com", "password", Set.of(adminRole, userRole));
+        User normalUser = createUser("user", "user@test.com", "password", Set.of(userRole));
 
         // Generate JWT tokens for testing
-        adminToken = generateTokenForUser("admin", Arrays.asList("ROLE_ADMIN", "ROLE_USER"));
-        userToken = generateTokenForUser("user", Arrays.asList("ROLE_USER"));
+        adminToken = jwtUtil.generateTokenFromUsername("admin");
+        userToken = jwtUtil.generateTokenFromUsername("user");
 
         // Create test data
         testConcepto1 = createTestConcepto("Renta Mensual", "Pago de renta mensual", "RENTA", 1L);
@@ -79,8 +104,19 @@ class ConceptosPagoIntegrationTest {
         testConcepto2 = conceptosPagoRepository.save(testConcepto2);
     }
 
-    private String generateTokenForUser(String username, List<String> roles) {
-        return jwtUtil.generateTokenFromUsername(username);
+    private Role createRole(String roleName) {
+        Role role = new Role();
+        role.setName(Role.ERole.valueOf(roleName));
+        return roleRepository.save(role);
+    }
+
+    private User createUser(String username, String email, String password, Set<Role> roles) {
+        User user = new User();
+        user.setUsername(username);
+        user.setEmail(email);
+        user.setPassword(passwordEncoder.encode(password));
+        user.setRoles(roles);
+        return userRepository.save(user);
     }
 
     private ConceptosPago createTestConcepto(String nombre, String descripcion, String tipo, Long idInmobiliaria) {

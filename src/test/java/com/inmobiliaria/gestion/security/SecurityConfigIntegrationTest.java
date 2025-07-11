@@ -7,6 +7,7 @@ import com.inmobiliaria.gestion.auth.model.User;
 import com.inmobiliaria.gestion.auth.repository.RoleRepository;
 import com.inmobiliaria.gestion.auth.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
+import org.springframework.transaction.annotation.Transactional;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureWebMvc;
@@ -32,18 +33,19 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureWebMvc
 @ActiveProfiles("test")
+@Transactional
 class SecurityConfigIntegrationTest {
 
     @Autowired
     private WebApplicationContext context;
 
-    @MockBean
+    @Autowired
     private UserRepository userRepository;
 
-    @MockBean
+    @Autowired
     private RoleRepository roleRepository;
 
-    @MockBean
+    @Autowired
     private PasswordEncoder passwordEncoder;
 
     @Autowired
@@ -60,6 +62,25 @@ class SecurityConfigIntegrationTest {
                 .webAppContextSetup(context)
                 .apply(springSecurity())
                 .build();
+
+        // Clean repositories
+        userRepository.deleteAll();
+        roleRepository.deleteAll();
+    }
+
+    private Role createRole(String roleName) {
+        Role role = new Role();
+        role.setName(Role.ERole.valueOf(roleName));
+        return roleRepository.save(role);
+    }
+
+    private User createUser(String username, String email, String password, Set<Role> roles) {
+        User user = new User();
+        user.setUsername(username);
+        user.setEmail(email);
+        user.setPassword(passwordEncoder.encode(password));
+        user.setRoles(roles);
+        return userRepository.save(user);
     }
 
     @Test
@@ -96,8 +117,6 @@ class SecurityConfigIntegrationTest {
     @Test
     void authEndpoints_ShouldBeAccessibleWithoutAuthentication() throws Exception {
         // Test roles endpoint
-        when(roleRepository.findAll()).thenReturn(java.util.List.of());
-
         mockMvc.perform(get("/api/v1/auth/roles"))
                 .andExpect(status().isOk());
 
@@ -130,21 +149,8 @@ class SecurityConfigIntegrationTest {
     @Test
     void protectedEndpoints_WithValidJWT_ShouldAllowAccess() throws Exception {
         // Given - Create a test user and JWT token
-        Role userRole = Role.builder()
-                .id(1)
-                .name(Role.ERole.ROLE_USER)
-                .build();
-
-        User testUser = User.builder()
-                .id(1L)
-                .username("testuser")
-                .email("test@example.com")
-                .password("encodedPassword")
-                .enabled(true)
-                .roles(Set.of(userRole))
-                .build();
-
-        when(userRepository.findByUsername("testuser")).thenReturn(Optional.of(testUser));
+        Role userRole = createRole("ROLE_USER");
+        User testUser = createUser("testuser", "test@example.com", "password", Set.of(userRole));
 
         String token = jwtUtil.generateTokenFromUsername("testuser");
 
@@ -177,22 +183,8 @@ class SecurityConfigIntegrationTest {
     @Test
     void authenticationFlow_LoginAndAccessProtectedResource() throws Exception {
         // Given - Set up user for login
-        Role userRole = Role.builder()
-                .id(1)
-                .name(Role.ERole.ROLE_USER)
-                .build();
-
-        User testUser = User.builder()
-                .id(1L)
-                .username("testuser")
-                .email("test@example.com")
-                .password("encodedPassword")
-                .enabled(true)
-                .roles(Set.of(userRole))
-                .build();
-
-        when(userRepository.findByUsername("testuser")).thenReturn(Optional.of(testUser));
-        when(passwordEncoder.matches("password", "encodedPassword")).thenReturn(true);
+        Role userRole = createRole("ROLE_USER");
+        User testUser = createUser("testuser", "test@example.com", "password", Set.of(userRole));
 
         LoginRequest loginRequest = new LoginRequest("testuser", "password");
 
