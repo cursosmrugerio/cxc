@@ -21,6 +21,7 @@ Servers/
 .mcp.json
 gemini.md
 claude.md
+.vscode
 
 # Ignorar credenciales de Gemini
 .gemini/
